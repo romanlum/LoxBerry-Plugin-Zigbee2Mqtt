@@ -45,24 +45,24 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
-if [ -e /opt/zigbee2mqtt ] ; then
+if [ -e /opt/zigbee2mqtt ]; then
 	echo "<INFO> Removing old zigbee2mqtt installation"
 	rm -f -r /opt/zigbee2mqtt
 fi
 
-git  clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+git clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
-chown -R loxberry:loxberry /opt/zigbee2mqtt 
+chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
-npm install
+#                                                npm install
 
 mkdir -p /opt/zigbee2mqtt/data/log
 
-chown -R loxberry:loxberry /opt/zigbee2mqtt 
+chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 echo "<INFO> Copy back existing config files"
-cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/ 
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
 
 echo "<INFO> Remove temporary folders"
 rm -f -r /tmp/$PTEMPDIR\_upgrade
@@ -78,8 +78,7 @@ ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
 
 # Enable auto-start of Mosquitto service
 systemctl enable zigbee2mqtt
-systemctl start zigbee2mqtt
-
+#                                         systemctl start zigbee2mqtt
 
 # Exit with Status 0
 exit 0
