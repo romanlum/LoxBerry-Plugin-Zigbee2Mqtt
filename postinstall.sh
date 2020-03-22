@@ -57,5 +57,27 @@ echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
 echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
+if [ -e /opt/zigbee2mqtt ] ; then
+	echo "<INFO> Removing old zigbee2mqtt installation"
+	rm -f -r /opt/zigbee2mqtt
+fi
+
+git  clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+cd /opt/zigbee2mqtt
+npm install
+
+
+echo "<INFO> Copy back existing config files"
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/ 
+
+echo "<INFO> Remove temporary folders"
+rm -f -r /tmp/$PTEMPDIR\_upgrade
+
+echo "<INFO> Linking log to log folder"
+ln -f -s /opt/zigbee2mqtt/data/log $PLOG/logs
+
+echo "<INFO> Updating configuration"
+ln -f -s $PCONFIG/configuration.yaml /opt/zigbee2mqtt/data/configuration.yaml
+
 # Exit with Status 0
 exit 0

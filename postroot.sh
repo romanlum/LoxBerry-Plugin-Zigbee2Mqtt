@@ -45,19 +45,41 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
-echo "<INFO> Command is: $COMMAND"
-echo "<INFO> Temporary folder is: $TEMPDIR"
-echo "<INFO> (Short) Name is: $PSHNAME"
-echo "<INFO> Installation folder is: $ARGV3"
-echo "<INFO> Plugin version is: $ARGV4"
-echo "<INFO> Plugin CGI folder is: $PCGI"
-echo "<INFO> Plugin HTML folder is: $PHTML"
-echo "<INFO> Plugin Template folder is: $PTEMPL"
-echo "<INFO> Plugin Data folder is: $PDATA"
-echo "<INFO> Plugin Log folder (on RAMDISK!) is: $PLOG"
-echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
-echo "<INFO> Plugin SBIN folder is: $PSBIN"
-echo "<INFO> Plugin BIN folder is: $PBIN"
+if [ -e /opt/zigbee2mqtt ] ; then
+	echo "<INFO> Removing old zigbee2mqtt installation"
+	rm -f -r /opt/zigbee2mqtt
+fi
+
+git  clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+
+chown -R loxberry:loxberry /opt/zigbee2mqtt 
+
+cd /opt/zigbee2mqtt
+npm install
+
+mkdir -p /opt/zigbee2mqtt/data/log
+
+chown -R loxberry:loxberry /opt/zigbee2mqtt 
+
+echo "<INFO> Copy back existing config files"
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/ 
+
+echo "<INFO> Remove temporary folders"
+rm -f -r /tmp/$PTEMPDIR\_upgrade
+
+echo "<INFO> Linking log to log folder"
+ln -f -s /opt/zigbee2mqtt/data/log $PLOG
+
+echo "<INFO> Updating configuration"
+ln -f -s $PCONFIG/configuration.yaml /opt/zigbee2mqtt/data/configuration.yaml
+
+echo "<INFO> Updating service config"
+ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
+
+# Enable auto-start of Mosquitto service
+systemctl enable zigbee2mqtt
+systemctl start zigbee2mqtt
+
 
 # Exit with Status 0
 exit 0

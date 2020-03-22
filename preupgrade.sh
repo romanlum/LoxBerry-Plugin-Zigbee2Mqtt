@@ -45,14 +45,14 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
-echo "<INFO> Command is: $COMMAND"
-echo "<INFO> Temporary folder is: $TEMPDIR"
-echo "<INFO> (Short) Name is: $PSHNAME"
-echo "<INFO> Installation folder is: $ARGV3"
-echo "<INFO> Plugin version is: $ARGV4"
-echo "<INFO> Plugin CGI folder is: $PCGI"
-echo "<INFO> Plugin HTML folder is: $PHTML"
-echo "<INFO> Plugin Template folder is: $PTEMPL"
-echo "<INFO> Plugin Data folder is: $PDATA"
-echo "<INFO> Plugin Log folder (on RAMDISK!) is: $PLOG"
-echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
+echo "<INFO> Creating temporary folders for upgrading"
+mkdir /tmp/$PTEMPDIR\_upgrade
+mkdir /tmp/$PTEMPDIR\_upgrade/config
+
+
+echo "<INFO> Backing up existing config files"
+cp -v -r $PCONFIG/ /tmp/$PTEMPDIR\_upgrade/config
+
+
+# Exit with Status 0
+exit 0
