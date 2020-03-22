@@ -1,6 +1,6 @@
 {
   "usemqttgateway": "true",
-  "topic": "awattar",
+  "topic": "zigbee2mqtt",
   "username": "",
   "password": "",
   "server": "",
