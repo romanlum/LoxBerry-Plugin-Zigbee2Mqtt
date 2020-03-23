@@ -1,6 +1,7 @@
 <?php
 
 $mqttconfigfile = LBPCONFIGDIR . "/mqtt.json";
+$configfile = LBPCONFIGDIR . "/service.json";
 $serviceConfigFile = LBPCONFIGDIR . "/configuration.yaml";
 
 // The Navigation Bar

@@ -4,11 +4,13 @@ require_once "loxberry_io.php";
 require_once "phpMQTT/phpMQTT.php";
 require_once LBPBINDIR . "/defines.php";
 
-$mqttcfg = json_decode( file_get_contents($mqttconfigfile) );
-$serviceConfig = yaml_parse_file($serviceConfigFile);
+$mqttcfg = json_decode(file_get_contents($mqttconfigfile));
+$serviceCfg = json_decode(file_get_contents($configfile));
+
+$zigbee2mqttConfig = yaml_parse_file($serviceConfigFile);
 
 
-if(is_enabled($mqttcfg->usemqttgateway)) {
+if (is_enabled($mqttcfg->usemqttgateway)) {
     $creds = mqtt_connectiondetails();
 } else {
     $creds['brokerhost'] = $mqttcfg->server;
@@ -17,9 +19,17 @@ if(is_enabled($mqttcfg->usemqttgateway)) {
     $creds['brokerpass'] = $mqttcfg->password;
 }
 
-$serviceConfig["mqtt"]["base_topic"] = $mqttcfg->topic;
-$serviceConfig["mqtt"]["server"] = "mqtt://" . $creds['brokerhost'] . ":" . $creds['brokerport'];
-$serviceConfig["mqtt"]["user"] = $creds['brokeruser'];
-$serviceConfig["mqtt"]["password"] = $creds['brokerpass'];
+$zigbee2mqttConfig["mqtt"]["base_topic"] = $mqttcfg->topic;
+$zigbee2mqttConfig["mqtt"]["server"] = "mqtt://" . $creds['brokerhost'] . ":" . $creds['brokerport'];
+$zigbee2mqttConfig["mqtt"]["user"] = $creds['brokeruser'];
+$zigbee2mqttConfig["mqtt"]["password"] = $creds['brokerpass'];
 
-yaml_emit_file($serviceConfigFile,$serviceConfig);
+if ($serviceCfg->port != "") {
+    $zigbee2mqttConfig["serial"]["port"] = $serviceCfg->port;
+} else {
+    $zigbee2mqttConfig["serial"]["port"] = null;
+}
+$zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
+
+
+yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);

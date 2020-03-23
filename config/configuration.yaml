@@ -10,7 +10,7 @@ mqtt:
   # Required: MQTT base topic for zigbee2mqtt MQTT messages
   base_topic: zigbee2mqtt
   # Required: MQTT server URL (use mqtts:// for SSL/TLS connection)
-  server: 'mqtt://localhost:1883'
+  server: "mqtt://localhost:1883"
   # Optional: absolute path to SSL/TLS certificate of CA used to sign server and client certificates (default: nothing)
   user: my_user
   # Optional: MQTT server authentication password (default: nothing)
@@ -36,7 +36,7 @@ advanced:
   log_output:
     - console
     - file
- 
+
 # Optional: experimental options
 experimental:
   # Optional: MQTT output type: json, attribute or json_and_attribute (default: shown below)
@@ -44,4 +44,7 @@ experimental:
   # json: topic: 'zigbee2mqtt/my_bulb' payload '{"state": "ON"}'
   # attribute: topic 'zigbee2mqtt/my_bulb/state' payload 'ON"
   # json_and_attribute: both json and attribute (see above)
-  output: 'json'
+  output: "json"
+
+devices: devices.yaml
+groups: groups.yaml

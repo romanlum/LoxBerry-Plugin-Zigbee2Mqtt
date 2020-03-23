@@ -3,8 +3,8 @@
 require_once "loxberry_system.php";
 require_once LBPBINDIR . "/defines.php";
 
+$serviceCfg = json_decode(file_get_contents($configfile));
 $mqttcfg = json_decode( file_get_contents($mqttconfigfile) );
-$cfg = null;
 if( isset($_GET["action"]) && $_GET["action"] == "saveconfig" ) {
 	
 	foreach( $_POST as $key => $value ) {
@@ -12,9 +12,9 @@ if( isset($_GET["action"]) && $_GET["action"] == "saveconfig" ) {
 		// $data = generateNew($data, explode("_", $key), 0, $value);
 		
 		$tree = explode("_", $key);
-		if( $tree[0] == 'CONFIG' ) {
+		if( $tree[0] == 'SERVICE' ) {
 			// Changing base config
-			$forkobj = $cfg;
+			$forkobj = $serviceCfg;
 		} elseif ( $tree[0] == 'MQTT' ) {
 			// Changing mqtt config
 			$forkobj = $mqttcfg;
@@ -38,7 +38,7 @@ if( isset($_GET["action"]) && $_GET["action"] == "saveconfig" ) {
 	}
 
 	
-//	file_put_contents( $configfile, json_encode($cfg, JSON_PRETTY_PRINT) );
+	file_put_contents( $configfile, json_encode($serviceCfg, JSON_PRETTY_PRINT) );
 	file_put_contents( $mqttconfigfile, json_encode($mqttcfg, JSON_PRETTY_PRINT) );
 	
 	// Run aWATTar script
@@ -78,6 +78,3 @@ $codes = array (
 	}
 	exit(0);
 }
-
-
-?>
