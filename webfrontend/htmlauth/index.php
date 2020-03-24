@@ -5,7 +5,7 @@ require_once LBPBINDIR . "/defines.php";
 
 $navbar[1]['active'] = True;
 $navbar[2]['active'] = null;
-$navbar[3]['active'] = null;
+$navbar[99]['active'] = null;
 
 
 $L = LBSystem::readlanguage("language.ini");

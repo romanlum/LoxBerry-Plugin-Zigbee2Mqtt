@@ -2,11 +2,11 @@
 
 # Bash script which is executed in case of an update (if this plugin is already
 # installed on the system). This script is executed as very first step (*BEFORE*
-# preinstall.sh) and can be used e.g. to save existing configfiles to /tmp 
+# preinstall.sh) and can be used e.g. to save existing configfiles to /tmp
 # during installation. Use with caution and remember, that all systems may be
 # different!
 #
-# Exit code must be 0 if executed successfull. 
+# Exit code must be 0 if executed successfull.
 # Exit code 1 gives a warning but continues installation.
 # Exit code 2 cancels installation.
 #
@@ -27,13 +27,13 @@
 # <FAIL> This is a fail!"
 
 # To use important variables from command line use the following code:
-COMMAND=$0    # Zero argument is shell command
-PTEMPDIR=$1   # First argument is temp folder during install
-PSHNAME=$2    # Second argument is Plugin-Name for scipts etc.
-PDIR=$3       # Third argument is Plugin installation folder
-PVERSION=$4   # Forth argument is Plugin version
+COMMAND=$0  # Zero argument is shell command
+PTEMPDIR=$1 # First argument is temp folder during install
+PSHNAME=$2  # Second argument is Plugin-Name for scipts etc.
+PDIR=$3     # Third argument is Plugin installation folder
+PVERSION=$4 # Forth argument is Plugin version
 #LBHOMEDIR=$5 # Comes from /etc/environment now. Fifth argument is
-              # Base folder of LoxBerry
+# Base folder of LoxBerry
 
 # Combine them with /etc/environment
 PCGI=$LBPCGI/$PDIR
@@ -48,11 +48,11 @@ PBIN=$LBPBIN/$PDIR
 echo "<INFO> Creating temporary folders for upgrading"
 mkdir /tmp/$PTEMPDIR\_upgrade
 mkdir /tmp/$PTEMPDIR\_upgrade/config
+mkdir /tmp/$PTEMPDIR\_upgrade/data
 
-
-echo "<INFO> Backing up existing config files"
+echo "<INFO> Backing up existing files"
 cp -v -r $PCONFIG/ /tmp/$PTEMPDIR\_upgrade/config
-
+cp -v -r $PDATA/ /tmp/$PTEMPDIR\_upgrade/data
 
 # Exit with Status 0
 exit 0

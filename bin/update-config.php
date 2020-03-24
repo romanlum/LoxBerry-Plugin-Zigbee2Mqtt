@@ -16,8 +16,8 @@ $zigbee2mqttConfig["advanced"]["log_file"] = "zigbee2mqtt_%TIMESTAMP%.log";
 $zigbee2mqttConfig["advanced"]["log_output"][0] = "console";
 $zigbee2mqttConfig["advanced"]["log_output"][1] = "file";
 $zigbee2mqttConfig["experimental"]["output"] = "json";
-$zigbee2mqttConfig["devices"] = "devices.yml";
-$zigbee2mqttConfig["groups"] = "groups.yml";
+$zigbee2mqttConfig["devices"] = "devices.yaml";
+$zigbee2mqttConfig["groups"] = "groups.yaml";
 
 
 //MQTT parameter
