@@ -46,8 +46,8 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 if [ -e /opt/zigbee2mqtt ]; then
-	echo "<INFO> Removing old zigbee2mqtt installation"
-	rm -f -r /opt/zigbee2mqtt
+    echo "<INFO> Removing old zigbee2mqtt installation"
+    rm -f -r /opt/zigbee2mqtt
 fi
 
 git clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
@@ -55,9 +55,10 @@ git clone --branch 1.10.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /o
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
-#                                                npm install
+npm install
 
-mkdir -p /opt/zigbee2mqtt/data/log
+echo "<INFO> Remove default data folder"
+rm -f -r /opt/zigbee2mqtt/data
 
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
@@ -68,17 +69,22 @@ echo "<INFO> Remove temporary folders"
 rm -f -r /tmp/$PTEMPDIR\_upgrade
 
 echo "<INFO> Linking log to log folder"
-ln -f -s /opt/zigbee2mqtt/data/log $PLOG
+ln -f -s $PLOG /opt/zigbee2mqtt/log
 
-echo "<INFO> Updating configuration"
-ln -f -s $PCONFIG/configuration.yaml /opt/zigbee2mqtt/data/configuration.yaml
+echo "<INFO> Updating data folder"
+ln -f -s $PDATA /opt/zigbee2mqtt/data
+
+echo "<INFO> Refresh config"
+php $PBIN/update-config.php
+
+chown loxberry:loxberry $PDATA/* -R
 
 echo "<INFO> Updating service config"
 ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
 
 # Enable auto-start of Mosquitto service
 systemctl enable zigbee2mqtt
-#                                         systemctl start zigbee2mqtt
+systemctl start zigbee2mqtt
 
 # Exit with Status 0
 exit 0

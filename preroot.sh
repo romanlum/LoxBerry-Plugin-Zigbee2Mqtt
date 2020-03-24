@@ -46,13 +46,13 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 #!/bin/bash
-if [ -e /opt/zigbee2mqtt/data/configuration.yaml ] ; then
-	echo "<INFO> Removing zigbee2mqtt config symlink from plugin before update"
-	unlink /opt/zigbee2mqtt/data/configuration.yaml
-	echo "<INFO> The config symlink will be recreated during installation"
+if [ -e /opt/zigbee2mqtt/data ]; then
+	echo "<INFO> Removing zigbee2mqtt symlink from plugin before update"
+	unlink /opt/zigbee2mqtt/data
+	echo "<INFO> The data symlink will be recreated during installation"
 fi
 
 echo "<INFO> Stopping service if already running"
-if service --status-all | grep -Fq 'zigbee2mqtt'; then  
-    systemctl stop zigbee2mqtt
+if service --status-all | grep -Fq 'zigbee2mqtt'; then
+	systemctl stop zigbee2mqtt
 fi
