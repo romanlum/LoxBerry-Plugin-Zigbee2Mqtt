@@ -5,6 +5,7 @@ require_once LBPBINDIR . "/defines.php";
 
 $navbar[1]['active'] = True;
 $navbar[2]['active'] = null;
+$navbar[3]['active'] = null;
 
 
 $L = LBSystem::readlanguage("language.ini");
@@ -290,7 +291,7 @@ LBWeb::lbfooter();
 		viewhide();
 
 
-		$("#MQTTUseMQTTGateway, #country").click(function() {
+		$("#MQTTUseMQTTGateway").click(function() {
 			viewhide();
 		});
 		$("#saveapply").click(function() {
@@ -316,13 +317,6 @@ LBWeb::lbfooter();
 		} else {
 			$(".ownbroker").fadeIn();
 		}
-
-		if ($("#country").val() == "DE") {
-			$(".country").fadeOut();
-		} else {
-			$(".country").fadeIn();
-		}
-
 
 	}
 
@@ -385,15 +379,6 @@ LBWeb::lbfooter();
 				mqttconfig = data.MQTT;
 
 				formFill();
-
-				// Send Loxone Template if requested
-				if (action == "template") {
-					deviceName = template;
-					console.log("Template", template, "devicename", deviceName);
-					window.location.href = "gettemplate.php?template=" + deviceName;
-				}
-
-
 
 			})
 			.fail(function(error, textStatus, errorThrown) {
