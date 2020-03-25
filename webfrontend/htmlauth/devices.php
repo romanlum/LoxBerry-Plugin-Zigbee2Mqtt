@@ -94,15 +94,11 @@ LBWeb::lbfooter();
 <!-- JAVASCRIPT -->
 
 <script>
-	var config;
-
 	$(document).ready(function() {
 
 		var editor = ace.edit("editor");
 		editor.setTheme("ace/theme/chrome");
 		editor.getSession().setMode("ace/mode/yaml");
-
-		formFill();
 
 		$("#saveapply").click(function() {
 			saveapply();
@@ -120,49 +116,37 @@ LBWeb::lbfooter();
 
 	});
 
-	function formFill() {
 
-
-
-	}
 
 	function saveapply(action = "save", template = "") {
 		$("#savemessages").html("Submitting...");
 		$("#savemessages").css("color", "grey");
 
-		// Handle checkboxes: If checkbox is disabled, 
-		/* Get input values from form */
-		values = $("#form").serializeArray();
+		var editor = ace.edit("editor");
+		data = editor.getValue();
 
-		/* Because serializeArray() ignores unset checkboxes and radio buttons: */
-		values = values.concat(
-			$('#form input[type=checkbox]:not(:checked)').map(
-				function() {
-					// console.log("Checkbox", this.name, "Value", this.value);
-					return {
-						"name": this.name,
-						"value": "off"
-					}
-				}).get()
-		);
+		$.ajax({
+			type: "POST",
+			contentType: "text/plain",
+			url: "ajax-handler.php?action=savedevicedata",
+			dataType: "text",
+			data: data,
 
-		//$.post( "ajax-handler.php?action=saveconfig", $( "#form" ).serialize() )
-		$.post("ajax-handler.php?action=savedevicedata", values)
-			.done(function(data) {
-				console.log("Done:", data);
+			success: function(responseData, text) {
+				console.log("Done:", responseData);
 				$("#savemessages").html("Saved successfully");
 				$("#savemessages").css("color", "green");
 
-				console.log("Response data", data);
-
-				formFill();
-
-			})
-			.fail(function(error, textStatus, errorThrown) {
+			},
+			error: function(error, textStatus, errorThrown) {
 				console.log("Fail:", error, textStatus, errorThrown);
-				$("#savemessages").html("Error " + error.status + ": " + error.responseJSON.error);
+				$("#savemessages").html("Error " + error.status + ": " + JSON.parse(error.responseText).error);
 				$("#savemessages").css("color", "red");
 
-			});
+			}
+
+
+		});
+
 	}
 </script>

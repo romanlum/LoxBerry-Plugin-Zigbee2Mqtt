@@ -351,8 +351,7 @@ LBWeb::lbfooter();
 		$("#savemessages").html("Submitting...");
 		$("#savemessages").css("color", "grey");
 
-		// Handle checkboxes: If checkbox is disabled, 
-		/* Get input values from form */
+		//
 		values = $("#form").serializeArray();
 
 		/* Because serializeArray() ignores unset checkboxes and radio buttons: */
