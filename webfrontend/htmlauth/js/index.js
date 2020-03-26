@@ -46,6 +46,19 @@ function updateFormData(name) {
     });
 }
 
+function applyChanges() {
+    return new Promise((resolve, reject) => {
+        const jqxhr = $.post(`ajax.php/?action=applyChanges`);
+        jqxhr.done(function (data) {
+            resolve(data);
+        });
+
+        jqxhr.fail(function (jqxhr, textStatus, error) {
+            reject(error);
+        });
+    });
+}
+
 /**
  * Sets the form data
  * @param {string} name of the form
@@ -77,7 +90,9 @@ function saveAndApply() {
     const mqttPromise = updateFormData("MqttConfig");
 
     Promise.all([servicePromise, mqttPromise]).then(function (values) {
-        $(".submitting").fadeOut();
+        applyChanges().then(function (values) {
+            $(".submitting").fadeOut();
+        })
     });
 }
 

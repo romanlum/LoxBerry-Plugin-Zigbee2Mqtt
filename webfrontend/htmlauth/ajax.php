@@ -17,7 +17,19 @@ if (isset($_GET["action"])) {
         if (isset($_GET["form"])) {
             sendresponse(200, "application/json", setFormData($_GET["form"], $_POST));
         }
+    } else if ($action == "applyChanges") {
+        sendresponse(200, "application/json", applyChanges());
     }
+}
+
+/**
+ * apply the changes
+ */
+function applyChanges()
+{
+    shell_exec("php " . LBPBINDIR . "/update-config.php");
+    shell_exec("sudo systemctl restart zigbee2mqtt -q");
+    return '{"result":true}';
 }
 
 /**
