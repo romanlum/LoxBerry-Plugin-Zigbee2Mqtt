@@ -33,7 +33,6 @@ function updateFormData(name) {
             }
         }).get();
     data = data.concat(uncheckedItems);
-    console.log(data);
 
     return new Promise((resolve, reject) => {
         const jqxhr = $.post(`ajax.php/?action=setFormData&form=${name}`, data);
@@ -72,7 +71,23 @@ function setFormData(name, data) {
 }
 
 function saveAndApply() {
-    updateFormData("ServiceConfig");
+
+    $(".submitting").fadeIn();
+    const servicePromise = updateFormData("ServiceConfig");
+    const mqttPromise = updateFormData("MqttConfig");
+
+    Promise.all([servicePromise, mqttPromise]).then(function (values) {
+        $(".submitting").fadeOut();
+    });
+}
+
+function viewhide() {
+    if ($("#MqttConfig\\[usemqttgateway\\]").is(":checked")) {
+        $(".ownbroker").fadeOut();
+    } else {
+        $(".ownbroker").fadeIn();
+    }
+
 }
 
 /**
@@ -83,11 +98,20 @@ $(document).ready(function () {
     $("#saveapply").click(function () {
         saveAndApply();
     });
+    $("#MqttConfig\\[usemqttgateway\\]").click(function () {
+        viewhide();
+    });
 
     fetchFormData("ServiceConfig")
         .then(data => {
             setFormData("ServiceConfig", data);
-        })
+        });
+
+    fetchFormData("MqttConfig")
+        .then(data => {
+            setFormData("MqttConfig", data);
+            viewhide();
+        });
 
 })
 

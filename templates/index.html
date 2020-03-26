@@ -31,6 +31,10 @@
         width: 1.875em;
     }
 
+    .submitting {
+        color: grey;
+    }
+
     @media (min-width: 28em) {
 
         /*Repeated from rule .ui-flipswitch above*/
@@ -43,7 +47,7 @@
 <!-- Form SETTINGS -->
 <form id="ServiceConfig" onsubmit="return false;">
     <div class="wide">Zigbee2Mqtt</div>
-    <p><i>{{ 'ServiceConfig.DESC' | trans }}</i></p>
+    <p><i>{{ 'ServiceConfig.Desc' | trans }}</i></p>
 
     <!-- Service -->
     <div class="lb_flex-container">
@@ -80,8 +84,141 @@
     </div>
 </form>
 
+<form id="MqttConfig" onsubmit="return false;">
+    <div class="wide">MQTT</div>
+    <p><i>{{ 'Mqtt.Desc' | trans }}</i></p>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[topic]">{{ 'Mqtt.Topic' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="MqttConfig[topic]" name="MqttConfig[topic]" type="text" class="textfield"
+                data-validation-rule="^(?!.*//.*)[^\+#]+$"
+                data-validation-error-msg="{{ 'Mqtt.ValInvalidTopic' | trans }}">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{ 'Mqtt.HintTopic' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    {% if mqtt_installed == true %}
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[usemqttgateway]">{{'Mqtt.LabelUseMqttGateway' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input type="checkbox" name="MqttConfig[usemqttgateway]" id="MqttConfig[usemqttgateway]">
+            </fieldset>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'Mqtt.HintUseMqttGateway' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container MQTT">
+        <div class="lb_flex-item-label">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <span id="mqtt_onverviewlink"><a href="/admin/plugins/mqttgateway/index.cgi?form=topics"
+                    target="_blank">MQTT
+                    Gateway Incoming Overview</a></span>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+    {% else %}
+    <div class="lb_flex-container">
+        Das MQTT Gateway ist nicht installiert.
+    </div>
+    {% endif %}
+
+    <div class="lb_flex-container MQTT ownbroker" style="display:none">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[server]">{{ 'Mqtt.LabelServer' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="MqttConfig[server]" name="MqttConfig[server]" type="text" class="textfield"
+                data-validation-rule="special:hostname_or_ipaddr"
+                data-validation-error-msg="{{ 'Mqtt.ValInvalidServer' | trans }}">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{ 'Mqtt.HintServer' | trans }}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container MQTT ownbroker" style="display:none">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[port]">{{ 'Mqtt.LabelPort' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="MqttConfig[port]" name="MqttConfig[port]" type="text" class="textfield"
+                data-validation-rule="special:number-min-max-value:1:65000"
+                data-validation-error-msg="{{ 'Mqtt.ValInvalidPort' | trans }}">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{ 'Mqtt.HintPort' | trans }}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container MQTT ownbroker" style="display:none">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[username]">{{ 'Mqtt.LabelUsername' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="MqttConfig[username]" name="MqttConfig[username]" type="text"
+                class="textfield">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{ 'Mqtt.HintUsername' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container MQTT ownbroker" style="display:none">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="MqttConfig[password]">{{ 'Mqtt.LabelPassword' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="MqttConfig[password]" name="MqttConfig[password]" type="text"
+                class="textfield">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{ 'Mqtt.HintPassword' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div style="padding: 0px 0px 20px 0px;"></div>
+
+</form>
+
+
 <div style="display:flex;align-items:center;justify-content:center;height:16px;min-height:16px">
-    <span id="savemessages"></span>
+    <span id="savemessages">
+        <div class="submitting" style="display: none;">
+            {{ 'Common.Submitting' | trans }}
+        </div>
+    </span>
 </div>
 <div style="display:flex;align-items:center;justify-content:center;">
     <button class="ui-btn ui-btn-icon-right" id="saveapply" data-inline="true">{{ 'Common.SaveApply' | trans}}</button>
