@@ -1,0 +1,88 @@
+<style>
+    .mono {
+        font-family: monospace;
+        font-size: 110%;
+        font-weight: bold;
+        color: green;
+    }
+
+    #overlay {
+        display: none !important;
+    }
+
+    /* Custom indentations are needed because the length of custom labels differs from
+   the length of the standard labels */
+    .custom-size-flipswitch.ui-flipswitch .ui-btn.ui-flipswitch-on {
+        text-indent: -5.9em;
+    }
+
+    .custom-size-flipswitch.ui-flipswitch .ui-flipswitch-off {
+        text-indent: 0.5em;
+    }
+
+    /* Custom widths are needed because the length of custom labels differs from
+   the length of the standard labels */
+    .custom-size-flipswitch.ui-flipswitch {
+        width: 8.875em;
+    }
+
+    .custom-size-flipswitch.ui-flipswitch.ui-flipswitch-active {
+        padding-left: 7em;
+        width: 1.875em;
+    }
+
+    @media (min-width: 28em) {
+
+        /*Repeated from rule .ui-flipswitch above*/
+        .ui-field-contain>label+.custom-size-flipswitch.ui-flipswitch {
+            width: 1.875em;
+        }
+    }
+</style>
+
+<!-- Form SETTINGS -->
+<form id="ServiceConfig" onsubmit="return false;">
+    <div class="wide">Zigbee2Mqtt</div>
+    <p><i>{{ 'ServiceConfig.DESC' | trans }}</i></p>
+
+    <!-- Service -->
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label"
+                for="ServiceConfig[permitJoin]">{{ 'ServiceConfig.LabelPermitJoin' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input type="checkbox" name="ServiceConfig[permitJoin]" id="ServiceConfig[permitJoin]">
+            </fieldset>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintPermitJoin' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="ServiceConfig[port]">{{'ServiceConfig.LabelPort' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="ServiceConfig[port]" name="ServiceConfig[port]" type="text"
+                class="textfield">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintPort' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+</form>
+
+<div style="display:flex;align-items:center;justify-content:center;height:16px;min-height:16px">
+    <span id="savemessages"></span>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;">
+    <button class="ui-btn ui-btn-icon-right" id="saveapply" data-inline="true">{{ 'Common.SaveApply' | trans}}</button>
+</div>

@@ -1,5 +1,4 @@
 {
   "permitJoin": true,
-  "port": "/dev/ttyACM0",
-  "disable_led:": false
+  "port": "/dev/ttyACM0"
 }
