@@ -35,6 +35,7 @@ function applyChanges()
     LOGSTART("Restart zigbee2mqtt service");
     shell_exec("php " . LBPBINDIR . "/update-config.php");
     shell_exec("sudo systemctl restart zigbee2mqtt -q");
+    LOGOK("Restart ok");
     LOGEND("Restarted zigbee2mqtt service");
 
 
