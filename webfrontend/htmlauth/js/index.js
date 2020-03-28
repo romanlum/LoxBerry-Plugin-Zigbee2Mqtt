@@ -85,7 +85,10 @@ function setFormData(name, data) {
 
 function saveAndApply() {
 
+    $(".saveok").fadeOut();
+    $(".saveerror").fadeOut();
     $(".submitting").fadeIn();
+
     const servicePromise = updateFormData("ServiceConfig");
     const mqttPromise = updateFormData("MqttConfig");
 

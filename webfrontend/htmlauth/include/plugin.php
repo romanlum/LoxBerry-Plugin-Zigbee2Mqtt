@@ -3,6 +3,7 @@ require_once "loxberry_web.php";
 require_once "loxberry_system.php";
 require_once LBPBINDIR . "/formHelper.php";
 require_once LBPBINDIR . "/defines.php";
+require_once '/usr/share/php/Twig/autoload.php';
 
 /**
  * Plugin helper class
@@ -33,6 +34,7 @@ class Plugin
         $navbar[2]['Name'] = $L["Navbar.Devices"];
         $navbar[2]['URL'] = 'devices.php';
         $navbar[2]['active'] = null;
+        $navbar[2]['Script'] = array('ace.js', 'devices.js');
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = '/admin/system/logmanager.cgi?package=' . LBPPLUGINDIR;
@@ -47,10 +49,35 @@ class Plugin
         }
         // this script is included in the loxberry header
         if ($script != null) {
-            $htmlhead = '<script src="js/' . $script . '"></script>';
+            if (is_array($script)) {
+                foreach ($script as $value) {
+                    $htmlhead .= '<script src="js/' . $value . '"></script>';
+                }
+            } else {
+                $htmlhead = '<script src="js/' . $script . '"></script>';
+            }
         }
 
         // Creates the loxberry header
         LBWeb::lbheader($template_title, $helplink, $helptemplate);
+    }
+
+    /**
+     * Initializes the plugin environment
+     */
+    static function initializeTwig()
+    {
+        global $lbptemplatedir;
+        global $L;
+        $loader = new \Twig\Loader\FilesystemLoader($lbptemplatedir);
+        $twig = new \Twig\Environment($loader, [
+            'cache' => "$lbptemplatedir/cache",
+        ]);
+
+        $filter = new \Twig\TwigFilter('trans', function ($string) use ($L) {
+            return $L[$string];
+        });
+        $twig->addFilter($filter);
+        return $twig;
     }
 }

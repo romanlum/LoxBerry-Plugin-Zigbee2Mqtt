@@ -17,6 +17,8 @@ if (isset($_GET["action"])) {
         if (isset($_GET["form"])) {
             sendresponse(200, "application/json", setFormData($_GET["form"], $_POST));
         }
+    } else if ($action == "setDevices") {
+        sendresponse(200, "application/json", setDevices($_POST));
     } else if ($action == "applyChanges") {
         sendresponse(200, "application/json", applyChanges());
     }
@@ -80,6 +82,25 @@ function setFormData($form, $formData)
     $data = MakeObjectFromArray($class, $formData[$class->getName()]);
     $data->save();
     return '{"result": true}';
+}
+
+/**
+ * Sets the device data
+ */
+function setDevices($formData)
+{
+    global $deviceDataFile;
+
+    $data = file_get_contents('php://input');
+    if (yaml_parse($data) == FALSE) {
+        sendresponse(400, "application/json", '{ "error" : "Configuration not valid." }');
+        exit(1);
+    }
+
+    $file = fopen($deviceDataFile, "w");
+    fwrite($file, $data);
+    fclose($file);
+    sendresponse(200, "text/plain", $data);
 }
 
 function sendresponse($httpstatus, $contenttype, $response = null)
