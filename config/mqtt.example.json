@@ -1,8 +1,0 @@
-{
-  "usemqttgateway": "true",
-  "topic": "zigbee2mqtt",
-  "username": "",
-  "password": "",
-  "server": "",
-  "port": ""
-}

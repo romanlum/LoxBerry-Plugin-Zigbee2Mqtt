@@ -64,6 +64,7 @@ chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 echo "<INFO> Copy back existing config files"
 cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
 
 echo "<INFO> Remove temporary folders"
 rm -f -r /tmp/$PTEMPDIR\_upgrade
@@ -82,7 +83,7 @@ chown loxberry:loxberry $PDATA/* -R
 echo "<INFO> Updating service config"
 ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
 
-# Enable auto-start of Mosquitto service
+# Enable auto-start of zigbee2mqtt service
 systemctl enable zigbee2mqtt
 systemctl start zigbee2mqtt
 
