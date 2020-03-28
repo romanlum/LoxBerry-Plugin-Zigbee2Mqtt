@@ -92,8 +92,15 @@ function saveAndApply() {
     Promise.all([servicePromise, mqttPromise]).then(function (values) {
         applyChanges().then(function (values) {
             $(".submitting").fadeOut();
+            $(".saveok").fadeIn();
         })
-    });
+    })
+        .catch(function (values) {
+            $(".submitting").fadeOut();
+            $(".saveerror").fadeIn();
+        });
+
+
 }
 
 function viewhide() {

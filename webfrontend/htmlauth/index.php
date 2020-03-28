@@ -1,8 +1,7 @@
 <?php
-require_once "loxberry_system.php";
-require_once "loxberry_web.php";
 require_once '/usr/share/php/Twig/autoload.php';
-require_once LBPBINDIR . "/formHelper.php";
+
+require_once 'include/plugin.php';
 require_once 'model/ServiceConfig.php';
 require_once 'model/MqttConfig.php';
 
@@ -11,20 +10,16 @@ $twig = new \Twig\Environment($loader, [
     'cache' => "$lbptemplatedir/cache",
 ]);
 
-$L = LBSystem::readlanguage("language.ini");
 $filter = new \Twig\TwigFilter('trans', function ($string) use ($L) {
     return $L[$string];
 });
 $twig->addFilter($filter);
 
-$template_title = "Zigbee2Mqtt Plugin";
-$helplink = "https://www.loxwiki.eu/";
-$helptemplate = "help.html";
-
-$htmlhead = "<script src='js/index.js'></script>";
-LBWeb::lbheader($template_title, $helplink, $helptemplate);
+// Include header and set page as active
+Plugin::createHeader(1);
 
 $mqtt_installed = LBSystem::plugindata('mqttgateway') ? true : false;
+echo $twig->render('index.html', array("mqtt_installed" => $mqtt_installed));
 
-echo $twig->render('index.html',array("mqtt_installed" => $mqtt_installed));
+//creates the footer
 LBWeb::lbfooter();

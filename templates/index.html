@@ -35,6 +35,14 @@
         color: grey;
     }
 
+    .saveok {
+        color: green;
+    }
+
+    .saveerror {
+        color: red;
+    }
+
     @media (min-width: 28em) {
 
         /*Repeated from rule .ui-flipswitch above*/
@@ -128,8 +136,7 @@
         <div class="lb_flex-item-spacer"></div>
         <div class="lb_flex-item">
             <span id="mqtt_onverviewlink"><a href="/admin/plugins/mqttgateway/index.cgi?form=topics"
-                    target="_blank">MQTT
-                    Gateway Incoming Overview</a></span>
+                    target="_blank">{{ 'Common.MqttGatwayIncomming' | trans }}</a></span>
         </div>
         <div class="lb_flex-item-spacer"></div>
         <div class="lb_flex-item-help hint">
@@ -138,7 +145,7 @@
     </div>
     {% else %}
     <div class="lb_flex-container">
-        Das MQTT Gateway ist nicht installiert.
+        {{ 'Common.MqttGatewayNotInstalled' | trans }}
     </div>
     {% endif %}
 
@@ -217,6 +224,12 @@
     <span id="savemessages">
         <div class="submitting" style="display: none;">
             {{ 'Common.Submitting' | trans }}
+        </div>
+        <div class="saveok" style="display: none;">
+            {{ 'Common.HintSaveOK' | trans }}
+        </div>
+        <div class="saveerror" style="display: none;">
+            {{ 'Common.HintSaveError' | trans }}
         </div>
     </span>
 </div>
