@@ -37,8 +37,7 @@ class Plugin
         $navbar[2]['Script'] = array('ace.js', 'devices.js');
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
-        $navbar[99]['URL'] = '/admin/system/logmanager.cgi?package=' . LBPPLUGINDIR;
-        $navbar[99]['target'] = '_blank';
+        $navbar[99]['URL'] = 'log.php';
         $navbar[99]['active'] = null;
 
 

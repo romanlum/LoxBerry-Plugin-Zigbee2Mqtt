@@ -1,11 +1,13 @@
 <?php
 
 require_once "loxberry_system.php";
+require_once "loxberry_log.php";
 require_once "model/ServiceConfig.php";
 require_once "model/MqttConfig.php";
 require_once LBPBINDIR . "/defines.php";
 require_once LBPBINDIR . "/formHelper.php";
 
+$log = LBLog::newLog(["name" => "Service"]);
 
 if (isset($_GET["action"])) {
     $action = $_GET["action"];
@@ -29,8 +31,13 @@ if (isset($_GET["action"])) {
  */
 function applyChanges()
 {
+
+    LOGSTART("Restart zigbee2mqtt service");
     shell_exec("php " . LBPBINDIR . "/update-config.php");
     shell_exec("sudo systemctl restart zigbee2mqtt -q");
+    LOGEND("Restarted zigbee2mqtt service");
+
+
     return '{"result":true}';
 }
 
@@ -91,8 +98,12 @@ function setDevices($formData)
 {
     global $deviceDataFile;
 
+    LOGSTART("Update device configuration");
+
     $data = file_get_contents('php://input');
     if (yaml_parse($data) == FALSE) {
+        LOGERR("Sent device configuration invalid was invalid");
+        LOGEND("Update failed");
         sendresponse(400, "application/json", '{ "error" : "Configuration not valid." }');
         exit(1);
     }
@@ -100,6 +111,7 @@ function setDevices($formData)
     $file = fopen($deviceDataFile, "w");
     fwrite($file, $data);
     fclose($file);
+    LOGEND("Update finished");
     sendresponse(200, "text/plain", $data);
 }
 

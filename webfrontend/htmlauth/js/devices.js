@@ -6,7 +6,7 @@ $(document).ready(function () {
 
     $("#saveapply").click(function () {
         saveapply();
-    }); w
+    });
 
     $("#saveapply").blur(function () {
         $("#savemessages").html("");

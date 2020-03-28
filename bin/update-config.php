@@ -1,8 +1,15 @@
 <?php
 require_once "loxberry_system.php";
+require_once "loxberry_log.php";
 require_once "loxberry_io.php";
 require_once "phpMQTT/phpMQTT.php";
 require_once LBPBINDIR . "/defines.php";
+
+
+$log = LBLog::newLog(["name" => "Service"]);
+
+LOGSTART("Update configuration");
+
 
 $mqttcfg = json_decode(file_get_contents($mqttconfigfile));
 $serviceCfg = json_decode(file_get_contents($configfile));
@@ -48,3 +55,5 @@ $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
 
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
+
+LOGEND("Update configuration finished");;
