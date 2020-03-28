@@ -55,5 +55,5 @@ $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
 
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
-
+LOGOK("Update successful");
 LOGEND("Update configuration finished");;

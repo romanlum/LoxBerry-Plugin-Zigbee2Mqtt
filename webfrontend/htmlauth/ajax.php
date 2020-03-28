@@ -111,6 +111,7 @@ function setDevices($formData)
     $file = fopen($deviceDataFile, "w");
     fwrite($file, $data);
     fclose($file);
+    LOGOK("Update OK");
     LOGEND("Update finished");
     sendresponse(200, "text/plain", $data);
 }
