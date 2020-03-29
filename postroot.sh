@@ -55,7 +55,13 @@ git clone --branch 1.12.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /o
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
-npm install
+yarn install
+retval="$?"
+if [ $retval -ne 0 ]
+then
+    echo "yarn install failed"
+    exit $retval
+fi
 
 echo "<INFO> Remove default data folder"
 rm -f -r /opt/zigbee2mqtt/data
