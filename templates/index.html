@@ -43,6 +43,14 @@
         color: red;
     }
 
+    #service_running {
+        color: green;
+    }
+
+    #service_not_running {
+        color: red;
+    }
+
     @media (min-width: 28em) {
 
         /*Repeated from rule .ui-flipswitch above*/
@@ -231,8 +239,15 @@
         <div class="saveerror" style="display: none;">
             {{ 'Common.HintSaveError' | trans }}
         </div>
+
     </span>
 </div>
 <div style="display:flex;align-items:center;justify-content:center;">
     <button class="ui-btn ui-btn-icon-right" id="saveapply" data-inline="true">{{ 'Common.SaveApply' | trans}}</button>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;" hidden>
+    <span style="display:none" id="service_running">{{'Common.ServiceRunning' | trans}} (PID <div style="display:inline"
+            id="servicepid">0
+        </div>)</span>
+    <span style="display:none" id="service_not_running">{{'Common.ServiceNotRunning' | trans}}</span>
 </div>
