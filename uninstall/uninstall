@@ -58,8 +58,11 @@ echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
 echo "<INFO> Stopping service if already running"
-if service --status-all | grep -Fq 'zigbee2mqtt'; then
+if [ -e  /etc/systemd/system/zigbee2mqtt.service ] then
 	systemctl stop zigbee2mqtt
+    systemctl disable zigbee2mqtt
+    unlink /etc/systemd/system/zigbee2mqtt.service
+    systemctl daemon-reload
 fi
 
 if [ -e /opt/zigbee2mqtt ]; then
