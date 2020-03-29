@@ -34,7 +34,7 @@ class Plugin
         $navbar[2]['Name'] = $L["Navbar.Devices"];
         $navbar[2]['URL'] = 'devices.php';
         $navbar[2]['active'] = null;
-        $navbar[2]['Script'] = array('ace.js', 'devices.js');
+        $navbar[2]['Script'] = array('vendor/ace.js', 'devices.js');
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = 'log.php';
