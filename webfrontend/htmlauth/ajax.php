@@ -23,6 +23,8 @@ if (isset($_GET["action"])) {
         sendresponse(200, "application/json", setDevices($_POST));
     } else if ($action == "applyChanges") {
         sendresponse(200, "application/json", applyChanges());
+    } else if ($action == "getPid") {
+        sendresponse(200, "application/json", getPid());
     }
 }
 
@@ -115,6 +117,16 @@ function setDevices($formData)
     LOGOK("Update OK");
     LOGEND("Update finished");
     sendresponse(200, "text/plain", $data);
+}
+
+/**
+ * Gets the pid of the zigbee2mqtt service
+ */
+function getPid()
+{
+    //fetches the pid or 0 if not running
+    $pid = shell_exec("systemctl show --property MainPID --value zigbee2mqtt");
+    return "{\"pid\":$pid }";
 }
 
 function sendresponse($httpstatus, $contenttype, $response = null)

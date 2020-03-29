@@ -60,6 +60,32 @@ function applyChanges() {
 }
 
 /**
+ * Fetches the pid of the zigbee2mqtt service
+ */
+function getPid() {
+    return new Promise((resolve, reject) => {
+        const jqxhr = $.getJSON(`ajax.php/?action=getPid`);
+        jqxhr.done(function (data) {
+            if (data.pid != 0) {
+                $("#servicepid").html(data.pid);
+                $("#service_not_running").fadeOut();
+                $("#service_running").fadeIn();
+            }
+            else {
+                $("#service_not_running").fadeIn();
+                $("#service_running").fadeOut();
+            }
+
+        });
+
+        jqxhr.fail(function (jqxhr, textStatus, error) {
+            $("#service_not_running").fadeIn();
+            $("#service_running").fadeOut();
+        });
+    });
+}
+
+/**
  * Sets the form data
  * @param {string} name of the form
  * @param {object} data for the form values
@@ -96,6 +122,7 @@ function saveAndApply() {
         applyChanges().then(function (values) {
             $(".submitting").fadeOut();
             $(".saveok").fadeIn();
+            getPid();
         })
     })
         .catch(function (values) {
@@ -137,6 +164,9 @@ $(document).ready(function () {
             setFormData("MqttConfig", data);
             viewhide();
         });
+
+    getPid();
+    setInterval(function () { getPid(); }, 5000);
 
 })
 

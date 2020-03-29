@@ -57,5 +57,15 @@ echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
 echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
+echo "<INFO> Stopping service if already running"
+if service --status-all | grep -Fq 'zigbee2mqtt'; then
+	systemctl stop zigbee2mqtt
+fi
+
+if [ -e /opt/zigbee2mqtt ]; then
+    echo "<INFO> Removing old zigbee2mqtt installation"
+    rm -f -r /opt/zigbee2mqtt
+fi
+
 # Exit with Status 0
 exit 0

@@ -7,7 +7,7 @@ ExecStart=/usr/bin/npm start
 WorkingDirectory=/opt/zigbee2mqtt
 StandardOutput=inherit
 StandardError=inherit
-Restart=always
+Restart=on-abnormal
 User=loxberry
 
 [Install]
