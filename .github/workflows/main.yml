@@ -8,6 +8,20 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  download_loxberry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install deps
+        run: apt-get update && apt-get install -y wget p7zip-full
+      - name: dl image
+        run: wget https://loxberry.kim.bz/stable/images/rasppi/loxberry-image-rasppi-2.0.0_bilbo.img.7z
+      - name: unpack
+        run: 7z x loxberry-image-rasppi-2.0.0_bilbo.img.7z
+      - name: Upload image
+        uses: actions/upload-artifact@v1
+        with:
+          name: image
+          path: loxberry-image-rasppi-2.0.0_bilbo.img
   test-job:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
@@ -17,7 +31,9 @@ jobs:
       # Label used to access the service container
       loxberry:
         # Docker Hub image
-        image: lukechilds/dockerpi
+        image: lukechilds/dockerpi:vm
+        volumes: 
+          - /loxberry-image-rasppi-2.0.0_bilbo.img:/sdcard/filesystem.img
         ports: 
           - 5022:5022
         # Set health checks to wait until redis has started
@@ -28,7 +44,7 @@ jobs:
           --health-retries 10
 
     container:
-      image: kroniak/ssh-client
+      image: ictu/sshpass
     steps:
       - name: connect
-        run: ssh loxberry -p 5022
+        run: sshpass -p loxberr loxberry@loxberry -p 5022 date
