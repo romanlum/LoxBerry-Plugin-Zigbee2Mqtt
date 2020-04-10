@@ -11,8 +11,6 @@ jobs:
   test-job:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: node:10.18-jessie
 
     # Service containers to run with `container-job`
     services:
@@ -29,4 +27,4 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: echo "hallo"
+        run: ssh localhost -p 5022
