@@ -24,8 +24,8 @@ jobs:
         options: >-
           --health-cmd "systemctl is-active --quiet sshd"
           --health-interval 10s
-          --health-timeout 30s
-          --health-retries 5
+          --health-timeout 5m
+          --health-retries 10
 
     steps:
       - name: Install dependencies
