@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    container: node:10.16-jessie
+    steps:
+      - run: |
+          echo This job does specify a container.
+          echo It runs in the container instead of the VM.
+        name: Run in container
