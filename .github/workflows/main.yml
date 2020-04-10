@@ -18,7 +18,7 @@ jobs:
       - name: unpack
         run: 7z x loxberry-image-rasppi-2.0.0_bilbo.img.7z
       - name: run image
-        run: docker run --name loxberry --rm -v loxberry-image-rasppi-2.0.0_bilbo.img:/sdcard/filesystem.img --health-cmd "netstat -lntp |grep 5022" --health-interval 10s --health-timeout 5m --health-retries 10 -p 5022:5022 lukechilds/dockerpi:vm
+        run: docker run --name loxberry --rm -v $PWD/loxberry-image-rasppi-2.0.0_bilbo.img:/sdcard/filesystem.img --health-cmd "netstat -lntp |grep 5022" --health-interval 10s --health-timeout 5m --health-retries 10 -p 5022:5022 lukechilds/dockerpi:vm
       - name: dl wait script
         run: wget -nv https://raw.githubusercontent.com/jordyv/wait-for-healthy-container/master/wait-for-healthy-container.sh
       - name: change exec priv
