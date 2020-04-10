@@ -11,7 +11,7 @@ jobs:
   test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    container: node:10.16-jessie
+    container: lukechilds/dockerpi
     steps:
       - run: |
           echo This job does specify a container.
