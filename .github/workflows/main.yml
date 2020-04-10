@@ -18,6 +18,8 @@ jobs:
       loxberry:
         # Docker Hub image
         image: lukechilds/dockerpi
+        ports: 
+          - 5022:5022
         # Set health checks to wait until redis has started
         options: >-
           --health-cmd "netstat -lntp |grep 5022"
@@ -25,6 +27,8 @@ jobs:
           --health-timeout 5m
           --health-retries 10
 
+    container:
+      image: kroniak/ssh-client
     steps:
-      - name: Install dependencies
+      - name: connect
         run: ssh loxberry -p 5022
