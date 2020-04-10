@@ -13,7 +13,5 @@ jobs:
     runs-on: ubuntu-latest
     container: lukechilds/dockerpi
     steps:
-      - run: |
-          echo This job does specify a container.
-          echo It runs in the container instead of the VM.
-        name: Run in container
+      - name: Run entrypoint
+        run: /entrypoint.sh 
