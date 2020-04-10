@@ -20,7 +20,7 @@ jobs:
         image: lukechilds/dockerpi
         # Set health checks to wait until redis has started
         options: >-
-          --health-cmd "systemctl is-active --quiet sshd"
+          --health-cmd "netstat -lntp |grep 5022"
           --health-interval 10s
           --health-timeout 5m
           --health-retries 10
