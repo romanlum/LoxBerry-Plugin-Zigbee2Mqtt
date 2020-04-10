@@ -27,4 +27,4 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: ssh localhost -p 5022
+        run: ssh loxberry -p 5022
