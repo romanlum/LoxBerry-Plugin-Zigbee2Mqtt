@@ -25,4 +25,8 @@ jobs:
         run: chmod +x wait-for-healthy-container.sh     
       - name: wait for docker
         run: ./wait-for-healthy-container.sh loxberry 300
+      - name: run script
+        run: sshpass -p loxberry ssh loxberry@localhost -p 5022 ls
+      - name: delete container
+        run: docker rm -f loxberry
         
