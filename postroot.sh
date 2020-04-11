@@ -55,12 +55,25 @@ git clone --branch 1.12.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /o
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
-yarn install
-retval="$?"
-if [ $retval -ne 0 ]
-then
-    echo "yarn install failed"
-    exit $retval
+
+PIVERS=$($LBHOMEDIR/bin/showpitype)
+if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
+    echo "<WARN> Raspberry PI 1/Zero detected. Performance maybe not as good as on a RPI 2/3/4"
+    echo "<INFO> Downloading NodeJs 10 because NodeJs 12 is not usable on rpi1 / 2"
+    # download nodejs version for rpi 1 / zero
+    NODE=10.19.0
+    wget https://nodejs.org/dist/v$NODE/node-v$NODE-linux-armv6l.tar.xz
+    tar -xvf node-v$NODE-linux-armv6l.tar.xz
+    cp -R node-v$NODE-linux-armv6l/* /opt/zigbee2mqtt/node
+    rm -rf node-v$NODE-linux-armv6l node-v$NODE-linux-armv6l.tar.xz
+    /opt/zigbee2mqtt/node/bin/npm ci --production
+else
+    yarn install
+    retval="$?"
+    if [ $retval -ne 0 ]; then
+        echo "yarn install failed"
+        exit $retval
+    fi
 fi
 
 echo "<INFO> Remove default data folder"
@@ -87,7 +100,11 @@ php $PBIN/update-config.php
 chown loxberry:loxberry $PDATA/* -R
 
 echo "<INFO> Updating service config"
-ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
+if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
+    ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
+else
+    ln -f -s $PCONFIG/zigbee2mqttNode10.service /etc/systemd/system/zigbee2mqtt.service
+fi
 
 # Enable auto-start of zigbee2mqtt service
 systemctl enable zigbee2mqtt
