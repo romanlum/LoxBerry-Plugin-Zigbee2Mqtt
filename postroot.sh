@@ -70,10 +70,10 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
-yarn install
+npm ci --production
 retval="$?"
 if [ $retval -ne 0 ]; then
-    echo "yarn install failed"
+    echo "npm install failed"
     exit $retval
 fi
 
