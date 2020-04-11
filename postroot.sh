@@ -58,22 +58,23 @@ cd /opt/zigbee2mqtt
 
 PIVERS=$($LBHOMEDIR/bin/showpitype)
 if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
-    echo "<WARN> Raspberry PI 1/Zero detected. Performance maybe not as good as on a RPI 2/3/4"
-    echo "<INFO> Downloading NodeJs 10 because NodeJs 12 is not usable on rpi1 / 2"
+    echo "<WARN> Raspberry PI 1/Zero detected. Performance maybe bad on a RPI 2/3/4"
+    echo "<INFO> Downloading NodeJs 10 because NodeJs 12 is not usable on rpi1 / 2. This could take very long"
     # download nodejs version for rpi 1 / zero
     NODE=10.19.0
     wget https://nodejs.org/dist/v$NODE/node-v$NODE-linux-armv6l.tar.xz
     tar -xvf node-v$NODE-linux-armv6l.tar.xz
-    cp -R node-v$NODE-linux-armv6l/* /opt/zigbee2mqtt/node
+    mkdir -p /opt/zigbee2mqtt/node
+    cp -R node-v$NODE-linux-armv6l/* /opt/zigbee2mqtt/node/
     rm -rf node-v$NODE-linux-armv6l node-v$NODE-linux-armv6l.tar.xz
-    /opt/zigbee2mqtt/node/bin/npm ci --production
-else
-    yarn install
-    retval="$?"
-    if [ $retval -ne 0 ]; then
-        echo "yarn install failed"
-        exit $retval
-    fi
+    export PATH=/opt/zigbee2mqtt/node/bin:$PATH
+fi
+
+yarn install
+retval="$?"
+if [ $retval -ne 0 ]; then
+    echo "yarn install failed"
+    exit $retval
 fi
 
 echo "<INFO> Remove default data folder"
@@ -101,9 +102,9 @@ chown loxberry:loxberry $PDATA/* -R
 
 echo "<INFO> Updating service config"
 if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
-    ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
-else
     ln -f -s $PCONFIG/zigbee2mqttNode10.service /etc/systemd/system/zigbee2mqtt.service
+else
+    ln -f -s $PCONFIG/zigbee2mqtt.service /etc/systemd/system/zigbee2mqtt.service
 fi
 
 # Enable auto-start of zigbee2mqtt service
