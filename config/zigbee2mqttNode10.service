@@ -1,0 +1,15 @@
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+
+[Service]
+Environment=PATH=/opt/zigbee2mqtt/node/bin:/opt/loxberry/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=npm start
+WorkingDirectory=/opt/zigbee2mqtt
+StandardOutput=inherit
+StandardError=inherit
+Restart=on-abnormal
+User=loxberry
+
+[Install]
+WantedBy=multi-user.target
