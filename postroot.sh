@@ -108,6 +108,7 @@ else
 fi
 
 # Enable auto-start of zigbee2mqtt service
+systemctl daemon-reload
 systemctl enable zigbee2mqtt
 systemctl start zigbee2mqtt
 
