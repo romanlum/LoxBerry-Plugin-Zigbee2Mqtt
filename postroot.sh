@@ -73,14 +73,12 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
-npm ci --production
+npm ci --production --unsafe-perm
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "npm install failed"
     exit $retval
 fi
-
-chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 echo "<INFO> Remove default data folder"
 rm -f -r /opt/zigbee2mqtt/data
