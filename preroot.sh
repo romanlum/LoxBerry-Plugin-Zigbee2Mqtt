@@ -53,6 +53,6 @@ if [ -e /opt/zigbee2mqtt/data ]; then
 fi
 
 echo "<INFO> Stopping service if already running"
-if service --status-all | grep -Fq 'zigbee2mqtt'; then
+if systemctl is-active --quiet zigbee2mqtt; then
 	systemctl stop zigbee2mqtt
 fi
