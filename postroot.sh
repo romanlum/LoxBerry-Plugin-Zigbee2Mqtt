@@ -55,7 +55,7 @@ if [ -e /opt/zigbee2mqtt ]; then
 fi
 
 git clone --branch 1.12.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-chown -R loxberry:loxberry /opt/zigbee2mqtt
+
 
 cd /opt/zigbee2mqtt
 
@@ -79,6 +79,8 @@ if [ $retval -ne 0 ]; then
     echo "npm install failed"
     exit $retval
 fi
+
+chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 echo "<INFO> Remove default data folder"
 rm -f -r /opt/zigbee2mqtt/data
