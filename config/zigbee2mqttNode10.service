@@ -1,6 +1,6 @@
 [Unit]
 Description=zigbee2mqtt
-After=network.target
+After=network.target createtmpfs.service loxberry.service
 
 [Service]
 Environment=PATH=/opt/zigbee2mqtt/node/bin:/opt/loxberry/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
