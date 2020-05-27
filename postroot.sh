@@ -45,13 +45,16 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
+echo "<INFO> Copy back existing config files"
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
+
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
     rm -f -r /opt/zigbee2mqtt
 fi
 
 git clone --branch 1.12.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
@@ -81,10 +84,6 @@ echo "<INFO> Remove default data folder"
 rm -f -r /opt/zigbee2mqtt/data
 
 chown -R loxberry:loxberry /opt/zigbee2mqtt
-
-echo "<INFO> Copy back existing config files"
-cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
-cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
 
 echo "<INFO> Remove temporary folders"
 rm -f -r /tmp/$PTEMPDIR\_upgrade
