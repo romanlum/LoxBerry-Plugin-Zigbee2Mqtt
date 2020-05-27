@@ -55,7 +55,7 @@ if [ -e /opt/zigbee2mqtt ]; then
 fi
 
 git clone --branch 1.12.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-chown -R loxberry:loxberry /opt/zigbee2mqtt
+
 
 cd /opt/zigbee2mqtt
 
@@ -73,7 +73,7 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
-npm ci --production
+npm ci --production --unsafe-perm
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "npm install failed"
