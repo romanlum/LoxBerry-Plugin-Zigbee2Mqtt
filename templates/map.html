@@ -1,0 +1,15 @@
+<div class="wide">Zigbee2Mqtt</div>
+<p><i>{{ 'Map.Desc' | trans }}</i></p>
+<hr>
+
+{% if error %}
+    <p> {{ 'Map.Error' | trans }} </p>
+{% else %}
+
+    <div id="devicemap"></div>
+
+{% endif %}
+
+
+<input type="hidden" id="deviceMapData" value="{{ deviceMapData }}"></input>
+
