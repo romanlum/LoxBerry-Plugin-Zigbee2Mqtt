@@ -107,7 +107,7 @@ chown loxberry:loxberry $PDATA/* -R
 
 # if we have a new installation we setup the encryption
 # https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
-if [ $ISUPGRADE -eq 0 ] then
+if [ "$ISUPGRADE" -eq "0" ]; then
     php $PBIN/setup-encryption.php
 fi
 
