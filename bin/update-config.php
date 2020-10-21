@@ -25,6 +25,8 @@ $zigbee2mqttConfig["advanced"]["log_output"][1] = "file";
 $zigbee2mqttConfig["experimental"]["output"] = "json";
 $zigbee2mqttConfig["devices"] = "devices.yaml";
 $zigbee2mqttConfig["groups"] = "groups.yaml";
+$zigbee2mqttConfig["frontend"]["port"][1] = 8881;
+$zigbee2mqttConfig["experimental"]["new_api"][1] = true;
 
 
 //MQTT parameter
