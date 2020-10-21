@@ -73,7 +73,7 @@ class Plugin
                     $htmlhead .= '<link rel="stylesheet" href="css/' . $value . '"></link>';
                 }
             } else {
-                $htmlhead = '<link rel="stylesheet" href="css/' . $script . '"></link>';
+                $htmlhead = '<link rel="stylesheet" href="css/' . $css . '"></link>';
             }
         }
 
