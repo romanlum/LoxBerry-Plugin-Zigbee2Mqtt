@@ -38,6 +38,7 @@ class Plugin
 
         $navbar[3]['Name'] = $L["Navbar.UI"];
         $navbar[3]['URL'] = 'ui.php';
+        $navbar[3]['css'] = 'ui.css';
         $navbar[3]['active'] = null;
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
@@ -47,8 +48,12 @@ class Plugin
 
         $navbar[$activePage]['active'] = true;
         $script = null;
+        $css = null;
         if (in_array('Script', $navbar[$activePage])) {
             $script = $navbar[$activePage]['Script'];
+        }
+        if (in_array('CSS', $navbar[$activePage])) {
+            $css = $navbar[$activePage]['CSS'];
         }
         // this script is included in the loxberry header
         if ($script != null) {
@@ -58,6 +63,17 @@ class Plugin
                 }
             } else {
                 $htmlhead = '<script src="js/' . $script . '"></script>';
+            }
+        }
+
+        // this css is included in the loxberry header
+        if ($css != null) {
+            if (is_array($css)) {
+                foreach ($css as $value) {
+                    $htmlhead .= '<link rel="stylesheet" href="css/' . $value . '"></link>';
+                }
+            } else {
+                $htmlhead = '<link rel="stylesheet" href="css/' . $script . '"></link>';
             }
         }
 
