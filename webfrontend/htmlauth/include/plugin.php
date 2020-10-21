@@ -36,6 +36,10 @@ class Plugin
         $navbar[2]['active'] = null;
         $navbar[2]['Script'] = array('vendor/ace.js', 'devices.js');
 
+        $navbar[3]['Name'] = $L["Navbar.UI"];
+        $navbar[3]['URL'] = 'ui.php';
+        $navbar[3]['active'] = null;
+
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = 'log.php';
         $navbar[99]['active'] = null;
