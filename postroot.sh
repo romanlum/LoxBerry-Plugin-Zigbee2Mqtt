@@ -45,6 +45,12 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
+
+ISUPGRADE=0
+if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
+    ISUPGRADE=1
+fi
+
 echo "<INFO> Copy back existing config files"
 cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
 cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
@@ -54,7 +60,7 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
-git clone --branch 1.14.2 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+git clone --branch 1.15.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
 
 cd /opt/zigbee2mqtt
@@ -98,6 +104,12 @@ echo "<INFO> Refresh config"
 php $PBIN/update-config.php
 
 chown loxberry:loxberry $PDATA/* -R
+
+# if we have a new installation we setup the encryption
+# https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
+if [ "$ISUPGRADE" -eq "0" ]; then
+    php $PBIN/setup-encryption.php
+fi
 
 echo "<INFO> Updating service config"
 if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
