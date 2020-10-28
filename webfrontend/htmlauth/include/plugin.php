@@ -18,6 +18,9 @@ class Plugin
     static function createHeader($activePage)
     {
 
+        global $configfile;
+        $serviceCfg = json_decode(file_get_contents($configfile));
+
         $template_title = "Zigbee2Mqtt Plugin";
         $helplink = "https://www.loxwiki.eu/";
         $helptemplate = "help.html";
@@ -36,10 +39,14 @@ class Plugin
         $navbar[2]['active'] = null;
         $navbar[2]['Script'] = array('vendor/ace.js', 'devices.js');
 
-        $navbar[3]['Name'] = $L["Navbar.UI"];
-        $navbar[3]['URL'] = 'ui.php';
-        $navbar[3]['CSS'] = 'ui.css';
-        $navbar[3]['active'] = null;
+        if(is_enabled($serviceCfg->enableUI))
+        {
+            $navbar[3]['Name'] = $L["Navbar.UI"];
+            $navbar[3]['URL'] = 'ui.php';
+            $navbar[3]['CSS'] = 'ui.css';
+            $navbar[3]['active'] = null;
+        }
+       
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = 'log.php';

@@ -123,6 +123,7 @@ function saveAndApply() {
             $(".submitting").fadeOut();
             $(".saveok").fadeIn();
             getPid();
+            location.reload();
         })
     })
         .catch(function (values) {

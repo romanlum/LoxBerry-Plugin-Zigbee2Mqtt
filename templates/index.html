@@ -85,6 +85,23 @@
 
     <div class="lb_flex-container">
         <div class="lb_flex-item-label">
+            <label class="control-label"
+                for="ServiceConfig[enableUI]">{{ 'ServiceConfig.LabelEnableUI' | trans }}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input type="checkbox" name="ServiceConfig[enableUI]" id="ServiceConfig[enableUI]">
+            </fieldset>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintEnableUI' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
             <label class="control-label" for="ServiceConfig[port]">{{'ServiceConfig.LabelPort' | trans}}</label>
         </div>
         <div class="lb_flex-item-spacer"></div>

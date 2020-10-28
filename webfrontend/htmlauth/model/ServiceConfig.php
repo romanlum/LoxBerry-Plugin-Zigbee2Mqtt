@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zigbee2Mqtt service configuration
  */
@@ -15,6 +14,11 @@ class ServiceConfig {
      * @var string */
     public $port = '';
 
+    /**
+     * Enable zigbee2mqtt ui
+     * @var bool
+     */
+    public $enableUI = false;
     /**
      * Creates a new instance
      */

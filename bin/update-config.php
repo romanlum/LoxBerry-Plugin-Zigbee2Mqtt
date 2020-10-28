@@ -25,8 +25,7 @@ $zigbee2mqttConfig["advanced"]["log_output"][1] = "file";
 $zigbee2mqttConfig["experimental"]["output"] = "json";
 $zigbee2mqttConfig["devices"] = "devices.yaml";
 $zigbee2mqttConfig["groups"] = "groups.yaml";
-$zigbee2mqttConfig["frontend"]["port"] = 8881;
-$zigbee2mqttConfig["experimental"]["new_api"] = true;
+
 
 
 //MQTT parameter
@@ -55,6 +54,14 @@ if ($serviceCfg->port != "") {
 }
 $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
+if(is_enabled($serviceCfg->enableUI)){
+    $zigbee2mqttConfig["frontend"]["port"] = 8881;
+    $zigbee2mqttConfig["experimental"]["new_api"] = true;
+}
+else {
+    $zigbee2mqttConfig["frontend"]["port"] = null;
+    $zigbee2mqttConfig["experimental"]["new_api"] = false;
+}
 
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
 LOGOK("Update successful");
