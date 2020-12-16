@@ -45,6 +45,12 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
+echo "<INFO> Command is: $COMMAND"
+echo "<INFO> Temporary folder is: $TEMPDIR"
+echo "<INFO> (Short) Name is: $PSHNAME"
+echo "<INFO> Loxberry Home is: $LBHOMEDIR"
+echo "<INFO> Plugin installation folder is: $PDIR"
+
 
 ISUPGRADE=0
 if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
