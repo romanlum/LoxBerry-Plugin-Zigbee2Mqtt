@@ -46,7 +46,7 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 echo "<INFO> Command is: $COMMAND"
-echo "<INFO> Temporary folder is: $TEMPDIR"
+echo "<INFO> Temporary folder is: $PTEMPDIR"
 echo "<INFO> (Short) Name is: $PSHNAME"
 echo "<INFO> Loxberry Home is: $LBHOMEDIR"
 echo "<INFO> Plugin installation folder is: $PDIR"
