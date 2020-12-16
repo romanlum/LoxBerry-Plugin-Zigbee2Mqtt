@@ -53,7 +53,7 @@ echo "<INFO> Plugin installation folder is: $PDIR"
 
 
 ISUPGRADE=0
-if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
+if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     echo "<INFO> Upgrade detected"
     ISUPGRADE=1
 fi
