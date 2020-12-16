@@ -54,12 +54,13 @@ echo "<INFO> Plugin installation folder is: $PDIR"
 
 ISUPGRADE=0
 if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
+    echo "<INFO> Upgrade detected"
     ISUPGRADE=1
 fi
 
 echo "<INFO> Copy back existing config files"
-cp -f -r /tmp/$PTEMPDIR\_upgrade/config/* $LBHOMEDIR/config/plugins/$PDIR/
-cp -f -r /tmp/$PTEMPDIR\_upgrade/data/* $LBHOMEDIR/data/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
 
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
