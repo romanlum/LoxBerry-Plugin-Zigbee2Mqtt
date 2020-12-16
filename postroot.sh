@@ -58,8 +58,8 @@ if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
 fi
 
 echo "<INFO> Copy back existing config files"
-cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
-cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/config/* $LBHOMEDIR/config/plugins/$PDIR/
+cp -f -r /tmp/$PTEMPDIR\_upgrade/data/* $LBHOMEDIR/data/plugins/$PDIR/
 
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
@@ -114,6 +114,7 @@ chown loxberry:loxberry $PDATA/* -R
 # if we have a new installation we setup the encryption
 # https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
 if [ "$ISUPGRADE" -eq "0" ]; then
+    echo "<INFO> Fresh installation detected - Set encryption key"
     php $PBIN/setup-encryption.php
 fi
 
