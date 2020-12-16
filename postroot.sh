@@ -45,9 +45,16 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
+echo "<INFO> Command is: $COMMAND"
+echo "<INFO> Temporary folder is: $PTEMPDIR"
+echo "<INFO> (Short) Name is: $PSHNAME"
+echo "<INFO> Loxberry Home is: $LBHOMEDIR"
+echo "<INFO> Plugin installation folder is: $PDIR"
+
 
 ISUPGRADE=0
-if [ -d "/tmp/$PTEMPDIR\_upgrade" ]; then
+if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
+    echo "<INFO> Upgrade detected"
     ISUPGRADE=1
 fi
 
@@ -108,6 +115,7 @@ chown loxberry:loxberry $PDATA/* -R
 # if we have a new installation we setup the encryption
 # https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
 if [ "$ISUPGRADE" -eq "0" ]; then
+    echo "<INFO> Fresh installation detected - Set encryption key"
     php $PBIN/setup-encryption.php
 fi
 
