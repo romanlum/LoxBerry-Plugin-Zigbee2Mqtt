@@ -46,14 +46,12 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 echo "<INFO> Checking if zigbee2mqtt repository is reachable before upgrade"
-git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/1.16.2
+git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/1.17.1
 retVal=$?
 if [ $retVal -ne 0 ]; then
     echo "<ERROR> Could not reach zigbee2mqtt repository. Please check if your loxberry has an internet connection."
     exit 2
 fi
-
-
 
 echo "<INFO> Creating temporary folders for upgrading"
 mkdir /tmp/$PTEMPDIR\_upgrade

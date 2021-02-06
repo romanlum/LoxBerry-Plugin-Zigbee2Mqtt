@@ -51,7 +51,6 @@ echo "<INFO> (Short) Name is: $PSHNAME"
 echo "<INFO> Loxberry Home is: $LBHOMEDIR"
 echo "<INFO> Plugin installation folder is: $PDIR"
 
-
 ISUPGRADE=0
 if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     echo "<INFO> Upgrade detected"
@@ -67,8 +66,7 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
-git clone --branch 1.16.2 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-
+git clone --branch 1.17.1 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
 
