@@ -1,0 +1,37 @@
+on:
+  release:
+    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+    types: [released]
+
+name: publish release
+
+jobs:
+  publish_release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: "master"
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: update release.cfg
+        env:
+          VERSION: ${{ steps.get_release.outputs.tag_name }}
+        run: |
+          cp resources/release.cfg release.cfg
+          sed -i "s/__VERSION__/$VERSION/g" release.cfg
+      - name: push release.cfg
+        uses: github-actions-x/commit@v2.7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: "master"
+          commit-message: "Release version ${{ github.ref }}"
+          force-add: "true"
+          files: release.cfg
+          name: release-bot
+          email: release-bot@lumetsnet.at
