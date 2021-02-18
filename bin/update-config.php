@@ -16,6 +16,13 @@ $serviceCfg = json_decode(file_get_contents($configfile));
 
 $zigbee2mqttConfig = yaml_parse_file($serviceConfigFile);
 
+############ handle upgrade from previous version  ##################
+
+//registerMqttTopic added in 0.8.0 ==> defaults to true to be backwards compatible
+if (!property_exists($mqttcfg, 'registerMqttTopic')) {
+    $mqttcfg['registerMqttTopic'] = true;
+}
+
 //fixed values used by plugin
 $zigbee2mqttConfig["homeassistant"] = false;
 $zigbee2mqttConfig["advanced"]["log_directory"] = "log";
@@ -31,7 +38,12 @@ $zigbee2mqttConfig["groups"] = "groups.yaml";
 //MQTT parameter
 if (is_enabled($mqttcfg->usemqttgateway)) {
     $creds = mqtt_connectiondetails();
-    file_put_contents($mqttGatewaySubscriptionFile, $mqttcfg->topic . "/#");
+
+    if (is_enabled($mqttcfg->registerMqttTopic)) {
+        file_put_contents($mqttGatewaySubscriptionFile, $mqttcfg->topic . "/#");
+    } else {
+        file_put_contents($mqttGatewaySubscriptionFile, "");
+    }
 } else {
     $creds['brokerhost'] = $mqttcfg->server;
     $creds['brokerport'] = $mqttcfg->port;
@@ -54,11 +66,10 @@ if ($serviceCfg->port != "") {
 }
 $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
-if(is_enabled($serviceCfg->enableUI)){
+if (is_enabled($serviceCfg->enableUI)) {
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
     $zigbee2mqttConfig["experimental"]["new_api"] = true;
-}
-else {
+} else {
     $zigbee2mqttConfig["frontend"]["port"] = null;
     $zigbee2mqttConfig["experimental"]["new_api"] = false;
 }

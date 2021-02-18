@@ -1,19 +1,21 @@
 <?php
+
 /**
  * MQTT Configuration class
  */
-class MqttConfig {
-    
+class MqttConfig
+{
+
     /** 
      * Use the mqtt-gateway mqtt server instead of a custom mqtt server
      * @var bool 
-    */
-    
+     */
+
     public $usemqttgateway = false;
     /** 
      * The mqtt topic
      * @var string 
-    */
+     */
     public $topic = '';
 
     /**
@@ -37,14 +39,22 @@ class MqttConfig {
     public $port = '';
 
     /**
+     * Register mqtt topic on mqtt gateway
+     */
+    public $registerMqttTopic = false;
+
+    /**
      * Creats a new instance
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /***
      * Loads the configuration and creates a new instance of the class
      */
-    public static function load() {
+    public static function load()
+    {
         $mqttconfigfile = LBPCONFIGDIR . "/mqtt.json";
         $data = json_decode(file_get_contents($mqttconfigfile), true);
         $class = new MqttConfig();
@@ -55,16 +65,17 @@ class MqttConfig {
     /**
      * Saves the instance to the configuration file
      */
-    public function save() {
+    public function save()
+    {
         $mqttconfigfile = LBPCONFIGDIR . "/mqtt.json";
         file_put_contents($mqttconfigfile, $this->toJson());
     }
-    
+
     /**
      * Creates a json string out of the class
      */
-    public function toJson() {
-         return json_encode($this,JSON_PRETTY_PRINT);
-     }
-
+    public function toJson()
+    {
+        return json_encode($this, JSON_PRETTY_PRINT);
+    }
 }
