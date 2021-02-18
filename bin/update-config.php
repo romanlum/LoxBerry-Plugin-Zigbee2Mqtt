@@ -20,7 +20,8 @@ $zigbee2mqttConfig = yaml_parse_file($serviceConfigFile);
 
 //registerMqttTopic added in 0.8.0 ==> defaults to true to be backwards compatible
 if (!property_exists($mqttcfg, 'registerMqttTopic')) {
-    $mqttcfg['registerMqttTopic'] = true;
+    $mqttcfg->registerMqttTopic = true;
+    file_put_contents($mqttconfigfile, json_encode($mqttcfg));
 }
 
 //fixed values used by plugin
