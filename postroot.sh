@@ -55,6 +55,9 @@ ISUPGRADE=0
 if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     echo "<INFO> Upgrade detected"
     ISUPGRADE=1
+    
+    #Replace service config in backup because it is copied back in the next step
+    cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/$PTEMPDIR\_upgrade/config/$PDIR/
 fi
 
 echo "<INFO> Copy back existing config files"
