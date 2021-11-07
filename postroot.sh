@@ -55,7 +55,7 @@ ISUPGRADE=0
 if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     echo "<INFO> Upgrade detected"
     ISUPGRADE=1
-    
+
     #Replace service config in backup because it is copied back in the next step
     cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/$PTEMPDIR\_upgrade/config/$PDIR/
 fi
@@ -69,7 +69,7 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
-git clone --branch 1.20.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+git clone --branch 1.22.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
 
