@@ -87,7 +87,7 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
-npm ci --production --unsafe-perm
+npm ci --unsafe-perm
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "npm install failed"
