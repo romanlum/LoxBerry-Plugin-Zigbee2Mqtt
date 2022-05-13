@@ -69,7 +69,7 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
-git clone --branch 1.24.0 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+git clone --branch 1.25.1 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
 
