@@ -71,7 +71,7 @@ if (is_enabled($serviceCfg->enableUI)) {
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
     $zigbee2mqttConfig["experimental"]["new_api"] = true;
 } else {
-    $zigbee2mqttConfig["frontend"]["port"] = null;
+    $zigbee2mqttConfig["frontend"] = false;
     $zigbee2mqttConfig["experimental"]["new_api"] = false;
 }
 
