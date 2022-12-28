@@ -8,10 +8,17 @@ $twig = Plugin::initializeTwig();
 // Include header and set page as active
 Plugin::createHeader(1);
 
-$mqtt_installed = LBSystem::plugindata('mqttgateway') ? true : false;
+$mqtt_installed = false;
+
 //mqtt is not a plugin anymore in lb >=3
-if(str_starts_with(LBSystem::lbversion,"3")){
+$major_version=number_format(substr(LBSystem::lbversion(),0,1));
+if($major_version > 2)
+{
     $mqtt_installed = true;
+}
+else
+{
+   $mqtt_installed = LBSystem::plugindata('mqttgateway') ? true : false;
 }
 echo $twig->render('index.html', array("mqtt_installed" => $mqtt_installed));
 
