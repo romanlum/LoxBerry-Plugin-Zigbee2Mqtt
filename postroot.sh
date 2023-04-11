@@ -33,6 +33,8 @@ PSHNAME=$2  # Second argument is Plugin-Name for scipts etc.
 PDIR=$3     # Third argument is Plugin installation folder
 PVERSION=$4 # Forth argument is Plugin version
 #LBHOMEDIR=$5 # Comes from /etc/environment now. Fifth argument is
+PTEMPPATH=$6  # Sixth argument is full temp path during install (see also $1)
+
 # Base folder of LoxBerry
 
 # Combine them with /etc/environment
@@ -50,6 +52,10 @@ echo "<INFO> Temporary folder is: $PTEMPDIR"
 echo "<INFO> (Short) Name is: $PSHNAME"
 echo "<INFO> Loxberry Home is: $LBHOMEDIR"
 echo "<INFO> Plugin installation folder is: $PDIR"
+
+#source version file
+${PTEMPPATH}/version.sh
+
 
 ISUPGRADE=0
 if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
@@ -69,7 +75,7 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
-git clone --branch 1.30.2 --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+git clone --branch $ZIGBEE2MQTT_VERSION --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 
 cd /opt/zigbee2mqtt
 
