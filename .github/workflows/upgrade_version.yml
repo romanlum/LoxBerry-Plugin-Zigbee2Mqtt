@@ -1,13 +1,13 @@
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
   schedule:
     - cron: 0 1 * * *
-  
+
 name: upgrade_version
 
 jobs:
-  publish_release:
-    name: Publish release
+  check_version:
+    name: Check zigbee2mqtt version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,7 +20,7 @@ jobs:
           . version.sh
           NEW_VERSION=`curl https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest -s | jq .tag_name -r`
           echo "ZIGBEE2MQTT_VERSION=$NEW_VERSION" > version.sh
-          echo '::set-output name=NEW_VERSION::$NEW_VERSION'
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
