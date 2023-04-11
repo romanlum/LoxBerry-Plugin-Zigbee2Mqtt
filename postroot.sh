@@ -54,7 +54,7 @@ echo "<INFO> Loxberry Home is: $LBHOMEDIR"
 echo "<INFO> Plugin installation folder is: $PDIR"
 
 #source version file
-${PTEMPPATH}/version.sh
+. ${PTEMPPATH}/version.sh
 
 
 ISUPGRADE=0

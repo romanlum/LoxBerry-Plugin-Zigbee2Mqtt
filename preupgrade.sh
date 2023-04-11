@@ -48,7 +48,7 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 #source version file
-${PTEMPPATH}/version.sh
+. ${PTEMPPATH}/version.sh
 
 echo "<INFO> Checking if zigbee2mqtt repository is reachable before upgrade"
 git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/$ZIGBEE2MQTT_VERSION
