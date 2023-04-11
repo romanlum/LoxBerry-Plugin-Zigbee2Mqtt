@@ -33,6 +33,8 @@ PSHNAME=$2  # Second argument is Plugin-Name for scipts etc.
 PDIR=$3     # Third argument is Plugin installation folder
 PVERSION=$4 # Forth argument is Plugin version
 #LBHOMEDIR=$5 # Comes from /etc/environment now. Fifth argument is
+PTEMPPATH=$6  # Sixth argument is full temp path during install (see also $1)
+
 # Base folder of LoxBerry
 
 # Combine them with /etc/environment
@@ -45,8 +47,11 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
+#source version file
+. ${PTEMPPATH}/version.sh
+
 echo "<INFO> Checking if zigbee2mqtt repository is reachable before upgrade"
-git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/1.30.2
+git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/$ZIGBEE2MQTT_VERSION
 retVal=$?
 if [ $retVal -ne 0 ]; then
     echo "<ERROR> Could not reach zigbee2mqtt repository. Please check if your loxberry has an internet connection."
