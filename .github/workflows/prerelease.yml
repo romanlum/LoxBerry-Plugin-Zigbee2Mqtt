@@ -44,6 +44,11 @@ jobs:
         uses: bruceadams/get-release@v1.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Install php dependencies
+        uses: php-actions/composer@v6
+        id: composer
+        with:
+          working_dir: "webfrontend/htmlauth/include"
       - name: Update plugin.cfg file
         env:
           VERSION: ${{ steps.get_release.outputs.tag_name }}
