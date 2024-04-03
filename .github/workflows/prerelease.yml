@@ -48,6 +48,8 @@ jobs:
         uses: php-actions/composer@v6
         id: composer
         with:
+          dev: no
+          args: --profile -o
           working_dir: "webfrontend/htmlauth/include"
       - name: Update plugin.cfg file
         env:

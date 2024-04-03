@@ -3,7 +3,8 @@ require_once "loxberry_web.php";
 require_once "loxberry_system.php";
 require_once LBPBINDIR . "/formHelper.php";
 require_once LBPBINDIR . "/defines.php";
-require_once '/usr/share/php/Twig/autoload.php';
+
+require __DIR__ . '/vendor/autoload.php';
 
 /**
  * Plugin helper class
