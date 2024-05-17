@@ -3,7 +3,8 @@ Description=zigbee2mqtt
 After=network.target network.target createtmpfs.service loxberry.service
 
 [Service]
-ExecStart=/usr/bin/npm start
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=npm start
 WorkingDirectory=/opt/zigbee2mqtt
 StandardOutput=inherit
 StandardError=inherit
