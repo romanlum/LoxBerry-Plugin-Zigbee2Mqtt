@@ -13,7 +13,12 @@ class ServiceConfig {
      * Path to the zigbee device 
      * @var string */
     public $port = '';
-
+    
+    /**
+     * Adapter type
+     * @var string
+     */
+    public $adapter = '';
     /**
      * Enable zigbee2mqtt ui
      * @var bool

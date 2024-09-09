@@ -75,6 +75,18 @@ if (is_enabled($serviceCfg->enableUI)) {
     $zigbee2mqttConfig["experimental"]["new_api"] = false;
 }
 
+if ($serviceCfg->adapter != "") {
+    $zigbee2mqttConfig["serial"]["adapter"] = $serviceCfg->adapter;
+}
+
+//save zigbee2mqtt config
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
+
+// if the adapter is empty, use the current value from the zigbee2mqtt config
+if ($serviceCfg->adapter == "") {
+    $serviceCfg->adapter = $zigbee2mqttConfig["serial"]["adapter"];
+    $serviceCfg->save();
+}
+
 LOGOK("Update successful");
 LOGEND("Update configuration finished");;
