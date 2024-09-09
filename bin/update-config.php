@@ -2,7 +2,6 @@
 require_once "loxberry_system.php";
 require_once "loxberry_log.php";
 require_once "loxberry_io.php";
-require_once "phpMQTT/phpMQTT.php";
 require_once LBPBINDIR . "/defines.php";
 
 
