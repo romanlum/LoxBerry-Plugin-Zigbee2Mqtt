@@ -84,7 +84,7 @@ yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
 // if the adapter is empty, use the current value from the zigbee2mqtt config
 if ($serviceCfg->adapter == "") {
     $serviceCfg->adapter = $zigbee2mqttConfig["serial"]["adapter"];
-    $serviceCfg->save();
+    file_put_contents($configfile, json_encode($serviceCfg,JSON_PRETTY_PRINT));
 }
 
 LOGOK("Update successful");
