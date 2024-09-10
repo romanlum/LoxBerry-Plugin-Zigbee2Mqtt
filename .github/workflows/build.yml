@@ -1,0 +1,39 @@
+on:
+  push:
+    branches:
+      - 'master'
+
+name: build dev version
+
+jobs:
+   build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install php dependencies
+        uses: php-actions/composer@v6
+        id: composer
+        with:
+          dev: no
+          args: --profile -o
+          working_dir: "webfrontend/htmlauth/include"
+      - name: Update plugin.cfg file
+        env:
+          VERSION: "dev"
+        run: |
+          sed -i "s/__VERSION__/$VERSION/g" plugin.cfg
+      - name: remove not needed folders
+        run: |
+          rm .git -r -f
+          rm .github -r -f
+      - uses: papeloto/action-zip@v1
+        with:
+          files: .
+          dest: plugin.zip
+      - name: Archive result
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: plugin.zip
