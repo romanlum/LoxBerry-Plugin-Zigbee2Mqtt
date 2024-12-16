@@ -93,7 +93,13 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
-npm ci --unsafe-perm
+npm install -g pnpm
+node --version  # Should output V18.x, V20.x, V22.X
+pnpm --version  # Should output 9.X
+pnpm i --frozen-lockfile
+
+# Build Zigbee2MQTT
+pnpm run build
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "npm install failed"
