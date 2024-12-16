@@ -91,11 +91,19 @@ if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
     cp -R node-v$NODE-linux-armv6l/* /opt/zigbee2mqtt/node/
     rm -rf node-v$NODE-linux-armv6l node-v$NODE-linux-armv6l.tar.xz
     export PATH=/opt/zigbee2mqtt/node/bin:$PATH
+else
+    NODE=22.12.0
+    wget https://nodejs.org/dist/v$NODE/node-v$NODE-linux-x64.tar.xz
+    tar -xvf node-v$NODE-linux-x64.tar.xz
+    mkdir -p /opt/zigbee2mqtt/node
+    mv node-v$NODE-linux-x64/* /opt/zigbee2mqtt/node/
+    rm -rf node-v$NODE-linux-x64.tar.xz
+    export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 fi
 
 npm install -g pnpm
-node --version  # Should output V18.x, V20.x, V22.X
-pnpm --version  # Should output 9.X
+node --version  
+pnpm --version  
 pnpm i --frozen-lockfile
 
 # Build Zigbee2MQTT
