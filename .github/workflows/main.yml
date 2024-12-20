@@ -11,19 +11,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Cache Vagrant boxes
+      - name: Cache diet-pi box
+        id: cache-diet-pi-box
         uses: actions/cache@v2
         with:
-          path: ~/.vagrant.d/boxes
-          key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
+          path: dietpi-bullseye.box
+          key: ${{ runner.os }}-dietpi-${{ hashFiles('build.sh') }}
           restore-keys: |
-            ${{ runner.os }}-vagrant-
+            ${{ runner.os }}-dietpiv-
       - name: Generate vagrant box
         run: |
           sudo apt-get update
           sudo apt-get install guestmount
           chmod +x ./build.sh
           sudo ./build.sh
+        if: steps.cache-diet-pi-box.outputs.cache-hit != 'true'
       - name: Setup HashiCorp Vagrant
         run: |
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -43,7 +45,7 @@ jobs:
           vboxmanage --version
       - name: import box
         run: |
-          vagrant box add file://./dietpi-bullseye.box
+          vagrant box add --name dietpi-bullseye file://./dietpi-bullseye.box
       - name: run box
         run: |
           mkdir box
