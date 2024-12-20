@@ -37,6 +37,7 @@ jobs:
           vboxmanage --version
       - name: test mount
         run: |
+          chmod +x ./build.sh
           ./build.sh
 
 
