@@ -32,9 +32,7 @@ wget -nc -c https://dietpi.com/downloads/images/${DIETPI_IMG}.qcow2.xz
 # extract files
 unxz ${DIETPI_IMG}.qcow2.xz
 
-# convert from img to qcow2 and resize to 10G
-qemu-img convert -f raw ${DIETPI_IMG}.qcow2 -O qcow2 box.img
-qemu-img resize -f qcow2 box.img 10G
+mv ${DIETPI_IMG}.qcow2 box.img
 
 # add files
 mkdir mountdisk
