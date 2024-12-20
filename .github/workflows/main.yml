@@ -47,6 +47,7 @@ jobs:
         run: |
           ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
+          vagrant box ls
       - name: run box
         run: |
           mkdir box
