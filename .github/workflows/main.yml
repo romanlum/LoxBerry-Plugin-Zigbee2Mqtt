@@ -48,6 +48,7 @@ jobs:
           ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
           vagrant box list
+          ls -la /home/runner/.vagrant.d/boxes/dietpi-bullseye/0/virtualbox
       - name: run box
         run: |
           mkdir box
