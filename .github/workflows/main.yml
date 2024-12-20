@@ -45,6 +45,7 @@ jobs:
           vboxmanage --version
       - name: import box
         run: |
+          ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
       - name: run box
         run: |

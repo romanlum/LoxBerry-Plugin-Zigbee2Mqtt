@@ -46,4 +46,4 @@ rmdir mountdisk
 # pack to box file
 tar czf ../{BOX_NAME}.box ../metadata.json ../Vagrantfile ./box.img
 
-cd -
+cd ..
