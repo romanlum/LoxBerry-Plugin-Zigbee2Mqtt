@@ -40,4 +40,4 @@ jobs:
           vagrant up
       - name: test
         run: |
-          vagrant ssh -c "ls -la"
+          vagrant ssh -c "wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && bash install.sh | tee /boot/loxberry_install.log"
