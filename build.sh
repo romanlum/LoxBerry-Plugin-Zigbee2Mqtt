@@ -28,7 +28,7 @@ mkdir -p target
 cd target
 
 # download dietpi img
-wget -nc -c https://dietpi.com/downloads/images/${DIETPI_IMG}.qcow2.xz
+wget -nc -nv -c https://dietpi.com/downloads/images/${DIETPI_IMG}.qcow2.xz
 # extract files
 unxz ${DIETPI_IMG}.qcow2.xz
 
@@ -37,8 +37,8 @@ mv ${DIETPI_IMG}.qcow2 box.img
 # add files
 mkdir mountdisk
 guestmount --add box.img --mount /dev/sda1 mountdisk/
-yes | cp -f ../dietpi.txt mountdisk/boot/dietpi.txt
-yes | cp -f ../Automation_Custom_PreScript.sh mountdisk/boot/Automation_Custom_PreScript.sh
+cp -f ../dietpi.txt mountdisk/boot/dietpi.txt
+cp -f ../Automation_Custom_PreScript.sh mountdisk/boot/Automation_Custom_PreScript.sh
 guestunmount mountdisk
 sleep 5
 rmdir mountdisk
