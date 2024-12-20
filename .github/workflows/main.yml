@@ -28,3 +28,6 @@ jobs:
           vagrant --version
           packer --version
           vboxmanage --version
+      - name: run vm
+        run: |
+          vagrant up
