@@ -11,13 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: test mount
-        run: |
-          sudo apt-get update
-          sudo apt-get install guestmount
-          chmod +x ./build.sh
-          sudo ./build.sh
-      
       - name: Cache Vagrant boxes
         uses: actions/cache@v2
         with:
@@ -25,6 +18,12 @@ jobs:
           key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
           restore-keys: |
             ${{ runner.os }}-vagrant-
+      - name: Generate vagrant box
+        run: |
+          sudo apt-get update
+          sudo apt-get install guestmount
+          chmod +x ./build.sh
+          sudo ./build.sh
       - name: Setup HashiCorp Vagrant
         run: |
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -42,11 +41,14 @@ jobs:
           vagrant --version
           packer --version
           vboxmanage --version
-         
-
-
-      - name: run vm
+      - name: import box
         run: |
+          vagrant box add file://./dietpi-bullseye.box
+      - name: run box
+        run: |
+          mkdir box
+          cd box
+          vagrant init dietpi-bullseye
           vagrant up
       - name: test
         run: |
