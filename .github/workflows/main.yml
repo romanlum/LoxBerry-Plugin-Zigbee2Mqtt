@@ -31,3 +31,6 @@ jobs:
       - name: run vm
         run: |
           vagrant up
+      - name: test
+        run: |
+          run: vagrant ssh -c "echo 'hello world!'"

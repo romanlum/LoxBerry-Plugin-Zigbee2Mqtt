@@ -1,8 +1,6 @@
 Vagrant.configure("2") do |config|
-    config.vm.box = "generic/ubuntu1804"
+  config.vm.box = "ravenclaw900/dietpi"
+  config.vm.box_version = "7.6"
+  config.ssh.username = "dietpi"
 
-    config.vm.define 'ubuntu'
-
-    # Prevent SharedFoldersEnableSymlinksCreate errors
-    config.vm.synced_folder ".", "/vagrant", disabled: true
 end
