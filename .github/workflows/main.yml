@@ -16,7 +16,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install guestmount
           chmod +x ./build.sh
-          ./build.sh
+          sudo ./build.sh
       
       - name: Cache Vagrant boxes
         uses: actions/cache@v2
