@@ -35,6 +35,11 @@ jobs:
           vagrant --version
           packer --version
           vboxmanage --version
+      - name: test mount
+        run: |
+          ./build.sh
+
+
       - name: run vm
         run: |
           vagrant up
