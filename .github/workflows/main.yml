@@ -40,4 +40,4 @@ jobs:
           vagrant up
       - name: test
         run: |
-          vagrant ssh -c "echo 'hello world!'"
+          vagrant ssh -c "ls -la"
