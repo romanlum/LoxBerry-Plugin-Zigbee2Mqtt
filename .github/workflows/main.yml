@@ -22,6 +22,7 @@ jobs:
      
       - name: Setup libvirt
         run: |
+          sudo apt-get update
           sudo apt install -y libvirt-daemon-system libvirt-dev libvirt-clients virt-manager qemu-kvm ebtables libguestfs-tools  ruby-fog-libvirt
           sudo systemctl enable --now libvirtd
           sudo systemctl start libvirtd
