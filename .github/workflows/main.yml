@@ -28,7 +28,7 @@ jobs:
           sudo systemctl start libvirtd
           sudo usermod -aG libvirt $(whoami)
           groups
-          chmod 777 /var/run/libvirt/libvirt-sock
+          sudo chmod 777 /var/run/libvirt/libvirt-sock
           ls -n /var/run/libvirt/libvirt-sock
           virsh list  --all
 
