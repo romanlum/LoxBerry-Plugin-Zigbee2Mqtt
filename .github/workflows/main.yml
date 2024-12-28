@@ -19,6 +19,14 @@ jobs:
           key: ${{ runner.os }}-dietpi-${{ hashFiles('build.sh') }}
           restore-keys: |
             ${{ runner.os }}-dietpi-
+      - name: Cache diet-pi loxberry box
+        id: cache-diet-pi-loxberry-box
+        uses: actions/cache@v2
+        with:
+          path: box/dietpi-bullseye.box
+          key: ${{ runner.os }}-dietpi-loxberry-${{ hashFiles('build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-dietpi-loxberry-
      
       - name: Setup libvirt
         run: |
@@ -59,16 +67,19 @@ jobs:
           chmod +x ./build.sh
           ./build.sh
         if: steps.cache-diet-pi-box.outputs.cache-hit != 'true'
-      - name: import box
+      - name: import base box
         run: |
           ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
           vagrant box list
-      - name: run box
+        if: steps.cache-diet-pi-loxberry-box.outputs.cache-hit != 'true'
+      - name: install loxberry
         run: |
           mkdir box
           cd box
           vagrant init dietpi-bullseye
           vagrant up --provider=libvirt 
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
+          vagrant package --base dietpi-bullseye --output dietpi-bullseye-loxberry.box
+        if: steps.cache-diet-pi-loxberry-box.outputs.cache-hit != 'true'
           
