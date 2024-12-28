@@ -68,11 +68,11 @@ jobs:
         run: |
           mkdir box
           cd box
-          sudo iptables -F
-          vagrant init dietpi-bullseye
-          vagrant up --provider=libvirt &
-          sleep 10
-          virsh --connect=qemu:///system net-dumpxml vagrant-libvirt
+#         vagrant init dietpi-bullseye
+          vagrant init aramcap/dietpi-bullseye
+          vagrant up --provider=libvirt 
+#          sleep 10
+#          virsh --connect=qemu:///system net-dumpxml vagrant-libvirt
       - name: test
         run: |
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
