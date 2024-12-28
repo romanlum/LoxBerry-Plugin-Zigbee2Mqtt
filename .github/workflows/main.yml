@@ -28,8 +28,8 @@ jobs:
           sudo systemctl start libvirtd
           sudo usermod -aG libvirt $(whoami)
           groups
-          sudo chmod 777 /var/run/libvirt/libvirt-sock
-          ls -n /var/run/libvirt/libvirt-sock
+          sudo chmod 777 /var/run/libvirt/*
+          ls -n /var/run/libvirt/
           virsh list  --all
 
       - name: Setup HashiCorp Vagrant
@@ -64,7 +64,12 @@ jobs:
           ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
           vagrant box list
-      
+      - name: run box
+        run: |
+          mkdir box
+          cd box
+          vagrant init dietpi-bullseye
+          vagrant up --provider=libvirt
       - name: test
         run: |
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
