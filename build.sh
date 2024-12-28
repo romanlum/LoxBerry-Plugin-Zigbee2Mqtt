@@ -20,7 +20,7 @@
 
 set -e
 
-DIETPI_IMG="DietPi_Proxmox-x86_64-Bookworm"
+DIETPI_IMG="DietPi_NativePC-BIOS-x86_64-Bookworm"
 BOX_NAME="dietpi-bullseye"
 
 # create build dir
@@ -28,11 +28,12 @@ mkdir -p target
 cd target
 
 # download dietpi img
-wget -nc -nv -c https://dietpi.com/downloads/images/${DIETPI_IMG}.qcow2.xz
+wget -nc -nv -c https://dietpi.com/downloads/images/${DIETPI_IMG}.img.xz
 # extract files
-unxz ${DIETPI_IMG}.qcow2.xz
+unxz ${DIETPI_IMG}.img.xz
 
-mv ${DIETPI_IMG}.qcow2 box.img
+qemu-img convert -f raw ${DIETPI_IMG}.img -O qcow2 box.img
+
 
 # add files
 mkdir mountdisk
