@@ -64,13 +64,7 @@ jobs:
           ls -la
           vagrant box add --name dietpi-bullseye file://$PWD/dietpi-bullseye.box
           vagrant box list
-      - name: run box
-        run: |
-          mkdir box
-          cd box
-          vagrant init dietpi-bullseye
-          newgrp libvirt
-          VAGRANT_LOG=debug vagrant up --provider=libvirt
+      
       - name: test
         run: |
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
