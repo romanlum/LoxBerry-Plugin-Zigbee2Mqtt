@@ -47,7 +47,7 @@ jobs:
         run: |
           vagrant --version
           packer --version
-          vboxmanage --version
+#          vboxmanage --version
       - name: import box
         run: |
           ls -la
