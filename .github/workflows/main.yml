@@ -37,7 +37,6 @@ jobs:
           sudo apt update
           sudo apt install -y vagrant
           sudo usermod -aG libvirt $(whoami)
-          sudo usermod -aG libvirtd $USER
           vagrant plugin install vagrant-libvirt
           
 
@@ -67,6 +66,7 @@ jobs:
           mkdir box
           cd box
           vagrant init dietpi-bullseye
+          su $USER
           VAGRANT_LOG=debug vagrant up --provider=libvirt
       - name: test
         run: |
