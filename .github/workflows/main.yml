@@ -26,7 +26,11 @@ jobs:
           sudo apt install -y libvirt-daemon-system libvirt-dev libvirt-clients virt-manager qemu-kvm ebtables libguestfs-tools  ruby-fog-libvirt
           sudo systemctl enable --now libvirtd
           sudo systemctl start libvirtd
-          sudo virsh list  --all
+          sudo usermod -aG libvirt $(whoami)
+          exec sudo -s -u ${USER}
+          groups
+          ls -n /var/run/libvirt/libvirt-sock
+          virsh list  --all
 
       - name: Setup HashiCorp Vagrant
         run: |
@@ -36,7 +40,6 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
           sudo apt update
           sudo apt install -y vagrant
-          sudo usermod -aG libvirt $(whoami)
           vagrant plugin install vagrant-libvirt
           
 
