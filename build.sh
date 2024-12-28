@@ -37,8 +37,8 @@ mv ${DIETPI_IMG}.qcow2 box.img
 # add files
 mkdir mountdisk
 sudo guestmount --add box.img --mount /dev/sda1 mountdisk/
-cp -f ../dietpi.txt mountdisk/boot/dietpi.txt
-cp -f ../Automation_Custom_PreScript.sh mountdisk/boot/Automation_Custom_PreScript.sh
+sudo cp -f ../dietpi.txt mountdisk/boot/dietpi.txt
+sudo cp -f ../Automation_Custom_PreScript.sh mountdisk/boot/Automation_Custom_PreScript.sh
 sudo guestunmount mountdisk
 sleep 5
 rmdir mountdisk
