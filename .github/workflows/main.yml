@@ -23,7 +23,7 @@ jobs:
         id: cache-diet-pi-loxberry-box
         uses: actions/cache@v2
         with:
-          path: box/dietpi-bullseye.box
+          path: box/dietpi-bullseye-loxberry.box
           key: ${{ runner.os }}-dietpi-loxberry-${{ hashFiles('build.sh') }}
           restore-keys: |
             ${{ runner.os }}-dietpi-loxberry-
