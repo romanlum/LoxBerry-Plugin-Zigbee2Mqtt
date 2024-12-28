@@ -68,7 +68,7 @@ jobs:
         run: |
           mkdir box
           cd box
-          vagrant init aramcap/dietpi-bullseye
+          vagrant init dietpi-bullseye
           vagrant up --provider=libvirt 
       - name: test
         run: |
