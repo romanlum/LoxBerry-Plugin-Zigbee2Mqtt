@@ -33,6 +33,10 @@ jobs:
           sudo apt update
           sudo apt install -y vagrant
           vagrant plugin install vagrant-libvirt
+      - name: Setup libvirt
+        run: |
+          sudo apt-get -y install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+          sudo systemctl enable --now libvirtd
       - name: Setup Virtualbox
         run: |
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
