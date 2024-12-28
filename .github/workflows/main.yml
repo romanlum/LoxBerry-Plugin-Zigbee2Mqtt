@@ -18,7 +18,7 @@ jobs:
           path: dietpi-bullseye.box
           key: ${{ runner.os }}-dietpi-${{ hashFiles('build.sh') }}
           restore-keys: |
-            ${{ runner.os }}-dietpiv-
+            ${{ runner.os }}-dietpi-
       - name: Generate vagrant box
         run: |
           sudo apt-get update
@@ -26,6 +26,10 @@ jobs:
           chmod +x ./build.sh
           sudo ./build.sh
         if: steps.cache-diet-pi-box.outputs.cache-hit != 'true'
+      - name: Setup libvirt
+        run: |
+          sudo apt-get -y install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils libvirt-dev
+          sudo systemctl enable --now libvirtd
       - name: Setup HashiCorp Vagrant
         run: |
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -33,10 +37,6 @@ jobs:
           sudo apt update
           sudo apt install -y vagrant
           sudo vagrant plugin install vagrant-libvirt
-      - name: Setup libvirt
-        run: |
-          sudo apt-get -y install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
-          sudo systemctl enable --now libvirtd
       - name: Setup Virtualbox
         run: |
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
