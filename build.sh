@@ -36,16 +36,14 @@ mv ${DIETPI_IMG}.qcow2 box.img
 
 # add files
 mkdir mountdisk
-guestmount --add box.img --mount /dev/sda1 mountdisk/
+sudo guestmount --add box.img --mount /dev/sda1 mountdisk/
 cp -f ../dietpi.txt mountdisk/boot/dietpi.txt
 cp -f ../Automation_Custom_PreScript.sh mountdisk/boot/Automation_Custom_PreScript.sh
-guestunmount mountdisk
+sudo guestunmount mountdisk
 sleep 5
 rmdir mountdisk
 
 # pack to box file
 tar czf ../${BOX_NAME}.box ../metadata.json ../Vagrantfile ./box.img
-
-vagrant mutate ./dietpi-bullseye.box virtualbox
 
 cd ..
