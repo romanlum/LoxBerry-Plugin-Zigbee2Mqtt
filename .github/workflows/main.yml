@@ -82,6 +82,5 @@ jobs:
           vagrant init dietpi-bullseye
           vagrant up --provider=libvirt 
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
-          vagrant package --base dietpi-bullseye --output dietpi-bullseye-loxberry.box
         if: steps.cache-diet-pi-loxberry-box.outputs.cache-hit != 'true'
           
