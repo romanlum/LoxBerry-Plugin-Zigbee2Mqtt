@@ -17,7 +17,8 @@
 #
 # You have a copy of the GNU Affero General Public License here: https://www.gnu.org/licenses/agpl-3.0.en.html.
 ####
-
+# Version dietpi 9.9
+# Version loxberry 3.0.1.2
 set -e
 
 DIETPI_IMG="DietPi_NativePC-BIOS-x86_64-Bookworm"

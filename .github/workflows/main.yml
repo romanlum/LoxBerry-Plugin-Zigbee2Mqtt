@@ -25,6 +25,8 @@ jobs:
         with:
           path: |
             ~/.vagrant.d/boxes
+            /etc/libvirt/qemu/
+            /var/lib/libvirt
             box
           key: ${{ runner.os }}-dietpi-loxberry-${{ hashFiles('build.sh') }}
           restore-keys: |
@@ -82,7 +84,7 @@ jobs:
           vagrant init dietpi-bullseye
           vagrant up --provider=libvirt 
           vagrant ssh -c "sudo wget https://raw.githubusercontent.com/mschlenstedt/Loxberry_Installer/main/install.sh && sudo  bash install.sh | sudo  tee /boot/loxberry_install.log"
-          
+          vagrant halt
         if: steps.cache-diet-pi-loxberry-box.outputs.cache-hit != 'true'
       - name: test
         run: |
