@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Cache diet-pi box
         id: cache-diet-pi-box
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: dietpi-bullseye.box
           key: ${{ runner.os }}-dietpi-${{ hashFiles('build.sh') }}
@@ -21,9 +21,11 @@ jobs:
             ${{ runner.os }}-dietpi-
       - name: Cache diet-pi loxberry box
         id: cache-diet-pi-loxberry-box
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
-          path: box/dietpi-bullseye-loxberry.box
+          path: |
+            ~/.vagrant.d/boxes
+            box
           key: ${{ runner.os }}-dietpi-loxberry-${{ hashFiles('build.sh') }}
           restore-keys: |
             ${{ runner.os }}-dietpi-loxberry-
