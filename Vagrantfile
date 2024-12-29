@@ -1,5 +1,6 @@
 Vagrant.configure("2") do |config|
 
+  config.ssh.insert_key = false
   config.vm.provider :libvirt do |libvirt|
 
     libvirt.driver = "kvm"
