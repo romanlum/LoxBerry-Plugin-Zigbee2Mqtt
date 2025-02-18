@@ -79,27 +79,35 @@ git clone --branch $ZIGBEE2MQTT_VERSION --depth 1 https://github.com/Koenkk/zigb
 
 cd /opt/zigbee2mqtt
 
-PIVERS=$($LBHOMEDIR/bin/showpitype)
-if [ "$PIVERS" = 'type_0' ] || [ "$PIVERS" = 'type_1' ]; then
-    echo "<WARN> Raspberry PI 1/Zero detected. Performance maybe bad on a RPI 2/3/4"
-    echo "<INFO> Downloading NodeJs 10 because NodeJs 12 is not usable on rpi1 / 2. This could take very long"
-    # download nodejs version for rpi 1 / zero
-    NODE=10.19.0
-    wget https://nodejs.org/dist/v$NODE/node-v$NODE-linux-armv6l.tar.xz
-    tar -xvf node-v$NODE-linux-armv6l.tar.xz
-    mkdir -p /opt/zigbee2mqtt/node
-    cp -R node-v$NODE-linux-armv6l/* /opt/zigbee2mqtt/node/
-    rm -rf node-v$NODE-linux-armv6l node-v$NODE-linux-armv6l.tar.xz
-    export PATH=/opt/zigbee2mqtt/node/bin:$PATH
-else
-    NODE=22.12.0
-    wget https://nodejs.org/dist/v$NODE/node-v$NODE-linux-x64.tar.xz
-    tar -xvf node-v$NODE-linux-x64.tar.xz
-    mkdir -p /opt/zigbee2mqtt/node
-    mv node-v$NODE-linux-x64/* /opt/zigbee2mqtt/node/
-    rm -rf node-v$NODE-linux-x64.tar.xz
-    export PATH=/opt/zigbee2mqtt/node/bin:$PATH
-fi
+# Get system architecture
+ARCH=$(uname -m)
+
+# Map architecture to Node.js download URL
+case $ARCH in
+  x86_64)
+    NODE_ARCH="x64"
+    ;;
+  aarch64)
+    NODE_ARCH="arm64"
+    ;;
+  armv7l)
+    NODE_ARCH="armv7l"
+    ;;
+  *)
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+    ;;
+esac
+
+# NODE_VERSION is set in version.sh
+
+wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
+tar -xvf node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
+mkdir -p /opt/zigbee2mqtt/node
+mv node-$NODE_VERSION-linux-$NODE_ARCH/* /opt/zigbee2mqtt/node/
+rm -rf node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
+export PATH=/opt/zigbee2mqtt/node/bin:$PATH
+
 
 npm install -g pnpm
 node --version  
