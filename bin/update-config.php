@@ -30,6 +30,7 @@ $zigbee2mqttConfig["advanced"]["log_file"] = "zigbee2mqtt.log";
 $zigbee2mqttConfig["advanced"]["log_output"][0] = "console";
 $zigbee2mqttConfig["advanced"]["log_output"][1] = "file";
 $zigbee2mqttConfig["advanced"]["output"] = "json";
+$zigbee2mqttConfig["device_options"] =  new stdClass();
 $zigbee2mqttConfig["devices"] = "devices.yaml";
 $zigbee2mqttConfig["groups"] = "groups.yaml";
 
