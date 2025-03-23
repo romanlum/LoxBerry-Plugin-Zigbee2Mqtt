@@ -24,12 +24,13 @@ if (!property_exists($mqttcfg, 'registerMqttTopic')) {
 }
 
 //fixed values used by plugin
-$zigbee2mqttConfig["homeassistant"] = false;
+$zigbee2mqttConfig["homeassistant"]["enabled"] = false;
 $zigbee2mqttConfig["advanced"]["log_directory"] = "log";
 $zigbee2mqttConfig["advanced"]["log_file"] = "zigbee2mqtt.log";
 $zigbee2mqttConfig["advanced"]["log_output"][0] = "console";
 $zigbee2mqttConfig["advanced"]["log_output"][1] = "file";
-$zigbee2mqttConfig["experimental"]["output"] = "json";
+$zigbee2mqttConfig["advanced"]["output"] = "json";
+$zigbee2mqttConfig["device_options"]["empty"] = false;
 $zigbee2mqttConfig["devices"] = "devices.yaml";
 $zigbee2mqttConfig["groups"] = "groups.yaml";
 
@@ -67,11 +68,10 @@ if ($serviceCfg->port != "") {
 $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
 if (is_enabled($serviceCfg->enableUI)) {
+    $zigbee2mqttConfig["frontend"]["enabled"] = true;
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
-    $zigbee2mqttConfig["experimental"]["new_api"] = true;
 } else {
-    $zigbee2mqttConfig["frontend"] = false;
-    $zigbee2mqttConfig["experimental"]["new_api"] = false;
+    $zigbee2mqttConfig["frontend"]["enabled"] = false;
 }
 
 if ($serviceCfg->adapter != "") {
