@@ -1,5 +1,12 @@
 {
     "require": {
         "twig/twig": "3.11.3"
+    },
+    "config": {
+        "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
     }
 }
