@@ -14,6 +14,35 @@ $mqttcfg = json_decode(file_get_contents($mqttconfigfile));
 $serviceCfg = json_decode(file_get_contents($configfile));
 
 $zigbee2mqttConfig = yaml_parse_file($serviceConfigFile);
+if (!is_array($zigbee2mqttConfig)) {
+    $zigbee2mqttConfig = [];
+}
+
+foreach (["homeassistant", "advanced", "device_options", "mqtt", "serial", "frontend"] as $section) {
+    if (!isset($zigbee2mqttConfig[$section]) || !is_array($zigbee2mqttConfig[$section])) {
+        $zigbee2mqttConfig[$section] = [];
+    }
+}
+
+function generateFrontendAuthToken()
+{
+    return bin2hex(random_bytes(16));
+}
+
+function loadSecretConfig($secretConfigFile)
+{
+    $secretConfig = yaml_parse_file($secretConfigFile);
+    if (!is_array($secretConfig)) {
+        $secretConfig = [];
+    }
+
+    return $secretConfig;
+}
+
+function saveSecretConfig($secretConfigFile, $secretConfig)
+{
+    yaml_emit_file($secretConfigFile, $secretConfig);
+}
 
 ############ handle upgrade from previous version  ##################
 
@@ -70,6 +99,16 @@ $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 if (is_enabled($serviceCfg->enableUI)) {
     $zigbee2mqttConfig["frontend"]["enabled"] = true;
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
+    $secretConfig = loadSecretConfig($secretConfigFile);
+    if (
+        !isset($secretConfig["auth_token"]) ||
+        !is_string($secretConfig["auth_token"]) ||
+        trim($secretConfig["auth_token"]) === ""
+    ) {
+        $secretConfig["auth_token"] = generateFrontendAuthToken();
+        saveSecretConfig($secretConfigFile, $secretConfig);
+    }
+    $zigbee2mqttConfig["frontend"]["auth_token"] = "!secret.yaml auth_token";
 } else {
     $zigbee2mqttConfig["frontend"]["enabled"] = false;
 }
@@ -82,7 +121,7 @@ if ($serviceCfg->adapter != "") {
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
 
 // if the adapter is empty, use the current value from the zigbee2mqtt config
-if ($serviceCfg->adapter == "") {
+if ($serviceCfg->adapter == "" && isset($zigbee2mqttConfig["serial"]["adapter"])) {
     $serviceCfg->adapter = $zigbee2mqttConfig["serial"]["adapter"];
     file_put_contents($configfile, json_encode($serviceCfg,JSON_PRETTY_PRINT));
 }
