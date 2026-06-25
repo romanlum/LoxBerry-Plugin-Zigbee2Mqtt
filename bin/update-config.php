@@ -53,7 +53,7 @@ if (!property_exists($mqttcfg, 'registerMqttTopic')) {
 }
 
 if (!property_exists($serviceCfg, 'enableUISecurity')) {
-    $serviceCfg->enableUISecurity = true;
+    $serviceCfg->enableUISecurity = false;
     file_put_contents($configfile, json_encode($serviceCfg, JSON_PRETTY_PRINT));
 }
 
