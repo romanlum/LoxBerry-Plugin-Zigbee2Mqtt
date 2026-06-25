@@ -25,6 +25,11 @@ class ServiceConfig {
      */
     public $enableUI = false;
     /**
+     * Protect zigbee2mqtt ui with auth token
+     * @var bool
+     */
+    public $enableUISecurity = true;
+    /**
      * Creates a new instance
      */
     public function __construct() {

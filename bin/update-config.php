@@ -52,6 +52,11 @@ if (!property_exists($mqttcfg, 'registerMqttTopic')) {
     file_put_contents($mqttconfigfile, json_encode($mqttcfg));
 }
 
+if (!property_exists($serviceCfg, 'enableUISecurity')) {
+    $serviceCfg->enableUISecurity = true;
+    file_put_contents($configfile, json_encode($serviceCfg, JSON_PRETTY_PRINT));
+}
+
 //fixed values used by plugin
 $zigbee2mqttConfig["homeassistant"]["enabled"] = false;
 $zigbee2mqttConfig["advanced"]["log_directory"] = "log";
@@ -99,18 +104,23 @@ $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 if (is_enabled($serviceCfg->enableUI)) {
     $zigbee2mqttConfig["frontend"]["enabled"] = true;
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
-    $secretConfig = loadSecretConfig($secretConfigFile);
-    if (
-        !isset($secretConfig["auth_token"]) ||
-        !is_string($secretConfig["auth_token"]) ||
-        trim($secretConfig["auth_token"]) === ""
-    ) {
-        $secretConfig["auth_token"] = generateFrontendAuthToken();
-        saveSecretConfig($secretConfigFile, $secretConfig);
+    if (is_enabled($serviceCfg->enableUISecurity)) {
+        $secretConfig = loadSecretConfig($secretConfigFile);
+        if (
+            !isset($secretConfig["auth_token"]) ||
+            !is_string($secretConfig["auth_token"]) ||
+            trim($secretConfig["auth_token"]) === ""
+        ) {
+            $secretConfig["auth_token"] = generateFrontendAuthToken();
+            saveSecretConfig($secretConfigFile, $secretConfig);
+        }
+        $zigbee2mqttConfig["frontend"]["auth_token"] = "!secret.yaml auth_token";
+    } else {
+        unset($zigbee2mqttConfig["frontend"]["auth_token"]);
     }
-    $zigbee2mqttConfig["frontend"]["auth_token"] = "!secret.yaml auth_token";
 } else {
     $zigbee2mqttConfig["frontend"]["enabled"] = false;
+    unset($zigbee2mqttConfig["frontend"]["auth_token"]);
 }
 
 if ($serviceCfg->adapter != "") {
