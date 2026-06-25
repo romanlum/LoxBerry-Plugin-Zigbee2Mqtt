@@ -4,6 +4,7 @@ After=network.target network.target createtmpfs.service loxberry.service
 
 [Service]
 Environment=PATH=/opt/zigbee2mqtt/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=Z2M_ONBOARD_URL=http://0.0.0.0:8881
 ExecStart=npm start
 WorkingDirectory=/opt/zigbee2mqtt
 StandardOutput=inherit
