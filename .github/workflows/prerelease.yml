@@ -68,7 +68,7 @@ jobs:
         run: |
           rm .git -r -f
           rm .github -r -f
-          rm -f output.log DOCKER_ENV
+          rm -f output.log DOCKER_ENV docker_tag
       - uses: papeloto/action-zip@v1
         with:
           files: .
