@@ -30,6 +30,7 @@ jobs:
         run: |
           rm .git -r -f
           rm .github -r -f
+          rm -f output.log DOCKER_ENV
       - name: Archive result
         uses: actions/upload-artifact@v4
         with:
