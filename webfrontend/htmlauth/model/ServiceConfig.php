@@ -20,6 +20,20 @@ class ServiceConfig {
      */
     public $adapter = '';
     /**
+     * Serial baudrate. Empty string means: leave the value in
+     * configuration.yaml untouched.
+     * @var string
+     */
+    public $baudrate = '';
+
+    /**
+     * Serial hardware flow control. Empty string means: leave the value in
+     * configuration.yaml untouched; "true" / "false" set it explicitly.
+     * @var string
+     */
+    public $rtscts = '';
+
+    /**
      * Enable zigbee2mqtt ui
      * @var bool
      */

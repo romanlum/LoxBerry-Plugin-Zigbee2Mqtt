@@ -78,6 +78,17 @@ if ($serviceCfg->adapter != "") {
     $zigbee2mqttConfig["serial"]["adapter"] = $serviceCfg->adapter;
 }
 
+// Baudrate and rtscts are only written when the user set them. An empty value
+// means "leave configuration.yaml alone", so a hand-edited value survives and
+// zigbee2mqtt keeps choosing the default for everyone who does not care.
+if (property_exists($serviceCfg, 'baudrate') && $serviceCfg->baudrate !== "" && $serviceCfg->baudrate !== null) {
+    $zigbee2mqttConfig["serial"]["baudrate"] = (int) $serviceCfg->baudrate;
+}
+
+if (property_exists($serviceCfg, 'rtscts') && $serviceCfg->rtscts !== "" && $serviceCfg->rtscts !== null) {
+    $zigbee2mqttConfig["serial"]["rtscts"] = ($serviceCfg->rtscts === true || $serviceCfg->rtscts === "true");
+}
+
 //save zigbee2mqtt config
 yaml_emit_file($serviceConfigFile, $zigbee2mqttConfig);
 
