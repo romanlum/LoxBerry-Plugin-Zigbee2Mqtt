@@ -63,12 +63,18 @@ if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     ISUPGRADE=1
 
     #Replace service config in backup because it is copied back in the next step
-    cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/$PTEMPDIR\_upgrade/config/$PDIR/
-fi
+    if [ -d "$LBHOMEDIR/config/plugins/$PDIR" ]; then
+        cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/$PTEMPDIR\_upgrade/config/$PDIR/
+    fi
 
-echo "<INFO> Copy back existing config files"
-cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
-cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
+    echo "<INFO> Copy back existing config files"
+    if [ -d "/tmp/$PTEMPDIR\_upgrade/config/$PDIR" ]; then
+        cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
+    fi
+    if [ -d "/tmp/$PTEMPDIR\_upgrade/data/$PDIR" ]; then
+        cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
+    fi
+fi
 
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
