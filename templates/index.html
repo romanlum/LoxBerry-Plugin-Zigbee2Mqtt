@@ -131,6 +131,41 @@
         </div>
         <div class="lb_flex-item-spacer"></div>
     </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="ServiceConfig[baudrate]">{{'ServiceConfig.LabelBaudrate' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <input width="100%" value="" id="ServiceConfig[baudrate]" name="ServiceConfig[baudrate]" type="text"
+                class="textfield">
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintBaudrate' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="ServiceConfig[rtscts]">{{'ServiceConfig.LabelRtscts' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <select width="100%" id="ServiceConfig[rtscts]" name="ServiceConfig[rtscts]" data-mini="true">
+                <option value="">{{'ServiceConfig.RtsctsUnset' | trans}}</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
+            </select>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintRtscts' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
 </form>
 
 <form id="MqttConfig" onsubmit="return false;">
