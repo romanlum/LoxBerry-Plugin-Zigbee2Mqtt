@@ -95,7 +95,7 @@ if [ -f "$PCONFIG/installed-version.json" ]; then
 fi
 
 echo "<INFO> Installing zigbee2mqtt $TARGET_VERSION"
-FALLBACK_NODE_VERSION=$NODE_VERSION $PSBIN/install-zigbee2mqtt.sh "$TARGET_VERSION" --from-plugin-install
+FALLBACK_NODE_VERSION=$NODE_VERSION $PBIN/install-zigbee2mqtt.sh "$TARGET_VERSION" --from-plugin-install
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "<ERROR> Installation of zigbee2mqtt $TARGET_VERSION failed"
