@@ -1,3 +1,11 @@
-# Sudoers file for the plugin. Note: All scripts in sbin will be added automatically
-# sbin/install-zigbee2mqtt.sh (invoked from webfrontend/htmlauth/ajax.php to
-# perform UI-triggered version upgrades) is covered by that automatic rule.
+# Sudoers file for the plugin.
+#
+# LoxBerry's plugin installer copies this file verbatim (no placeholder
+# substitution, unlike e.g. templates/*.html or config/*.service) to
+# system/sudoers/<pluginname>, so paths below must be hardcoded absolute
+# paths, not $LBPBIN or similar.
+#
+# Grants the web server user passwordless sudo to run the zigbee2mqtt
+# installer, used from webfrontend/htmlauth/ajax.php for UI-triggered
+# version upgrades (see bin/install-zigbee2mqtt.sh).
+loxberry ALL = NOPASSWD: /opt/loxberry/bin/plugins/zigbee2mqtt/install-zigbee2mqtt.sh
