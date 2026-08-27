@@ -17,9 +17,8 @@ jobs:
       - name: Check Zigbee2Mqtt version
         id: checkversion
         run: |
-          . version.sh
           NEW_VERSION=`curl https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest -s | jq .tag_name -r`
-          echo "ZIGBEE2MQTT_VERSION=$NEW_VERSION" > version.sh
+          sed -i "s/^ZIGBEE2MQTT_VERSION=.*/ZIGBEE2MQTT_VERSION=$NEW_VERSION/" version.sh
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5

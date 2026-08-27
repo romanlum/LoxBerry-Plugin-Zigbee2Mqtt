@@ -1,0 +1,86 @@
+<style>
+    .submitting {
+        color: grey;
+    }
+
+    .saveok {
+        color: green;
+    }
+
+    .saveerror {
+        color: red;
+    }
+
+    .mono {
+        font-family: monospace;
+        font-size: 110%;
+        font-weight: bold;
+    }
+
+    #upgradelog {
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+        background: #222;
+        color: #ddd;
+        padding: 8px;
+        margin-top: 12px;
+        font-family: monospace;
+        font-size: 85%;
+        white-space: pre-wrap;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="wide">Zigbee2Mqtt</div>
+<p><i>{{ 'Version.Desc' | trans }}</i></p>
+
+<div class="lb_flex-container">
+    <div class="lb_flex-item-label">
+        <label class="control-label">{{ 'Version.LabelInstalled' | trans }}</label>
+    </div>
+    <div class="lb_flex-item-spacer"></div>
+    <div class="lb_flex-item">
+        <span id="installedVersion" class="mono">-</span>
+    </div>
+    <div class="lb_flex-item-spacer"></div>
+    <div class="lb_flex-item-help hint"></div>
+    <div class="lb_flex-item-spacer"></div>
+</div>
+
+<div class="lb_flex-container">
+    <div class="lb_flex-item-label">
+        <label class="control-label" for="targetVersion">{{ 'Version.LabelTarget' | trans }}</label>
+    </div>
+    <div class="lb_flex-item-spacer"></div>
+    <div class="lb_flex-item">
+        <select width="100%" id="targetVersion" name="targetVersion" data-mini="true"></select>
+    </div>
+    <div class="lb_flex-item-spacer"></div>
+    <div class="lb_flex-item-help hint">
+        {{ 'Version.HintTarget' | trans }}
+    </div>
+    <div class="lb_flex-item-spacer"></div>
+</div>
+
+<div style="padding: 0px 0px 20px 0px;"></div>
+
+<div style="display:flex;align-items:center;justify-content:center;height:16px;min-height:16px">
+    <span id="savemessages">
+        <div class="submitting" style="display: none;">
+            {{ 'Version.Upgrading' | trans }}
+        </div>
+        <div class="saveok" style="display: none;">
+            {{ 'Version.HintUpgradeOK' | trans }}
+        </div>
+        <div class="saveerror" style="display: none;">
+            {{ 'Version.HintUpgradeError' | trans }}
+        </div>
+    </span>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;">
+    <button class="ui-btn ui-btn-icon-right" id="upgradebtn" data-inline="true"
+        data-confirm="{{ 'Version.ConfirmUpgrade' | trans }}">{{ 'Version.Upgrade' | trans }}</button>
+</div>
+
+<pre id="upgradelog"></pre>

@@ -47,7 +47,11 @@ class Plugin
             $navbar[3]['CSS'] = 'ui.css';
             $navbar[3]['active'] = null;
         }
-       
+
+        $navbar[4]['Name'] = $L["Navbar.Version"];
+        $navbar[4]['URL'] = 'version.php';
+        $navbar[4]['Script'] = 'version.js';
+        $navbar[4]['active'] = null;
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = 'log.php';
