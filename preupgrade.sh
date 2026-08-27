@@ -50,11 +50,22 @@ PBIN=$LBPBIN/$PDIR
 #source version file
 . ${PTEMPPATH}/version.sh
 
+# A version picked earlier in the web UI (persisted in installed-version.json)
+# takes precedence over the version.sh baseline shipped with this plugin
+# release - see postroot.sh and webfrontend/htmlauth/version.php.
+TARGET_VERSION=$ZIGBEE2MQTT_VERSION
+if [ -f "$PCONFIG/installed-version.json" ]; then
+    PINNED_VERSION=$(php -r '$d=json_decode(file_get_contents($argv[1]),true); if(isset($d["zigbee2mqttVersion"])) echo $d["zigbee2mqttVersion"];' "$PCONFIG/installed-version.json")
+    if [ -n "$PINNED_VERSION" ]; then
+        TARGET_VERSION=$PINNED_VERSION
+    fi
+fi
+
 echo "<INFO> Checking if zigbee2mqtt repository is reachable before upgrade"
-git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/$ZIGBEE2MQTT_VERSION
+git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git refs/tags/$TARGET_VERSION
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    echo "<ERROR> Could not reach zigbee2mqtt repository. Please check if your loxberry has an internet connection."
+    echo "<ERROR> Could not reach zigbee2mqtt repository, or the selected version $TARGET_VERSION does not exist. Please check if your loxberry has an internet connection."
     exit 2
 fi
 

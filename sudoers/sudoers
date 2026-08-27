@@ -1,1 +1,3 @@
 # Sudoers file for the plugin. Note: All scripts in sbin will be added automatically
+# sbin/install-zigbee2mqtt.sh (invoked from webfrontend/htmlauth/ajax.php to
+# perform UI-triggered version upgrades) is covered by that automatic rule.

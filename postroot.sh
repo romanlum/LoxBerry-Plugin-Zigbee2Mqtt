@@ -76,76 +76,34 @@ if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     fi
 fi
 
-if [ -e /opt/zigbee2mqtt ]; then
-    echo "<INFO> Removing old zigbee2mqtt installation"
-    rm -f -r /opt/zigbee2mqtt
+# Persist version.sh into the plugin's bin folder so install-zigbee2mqtt.sh
+# can still find a fallback Node.js version long after this install/upgrade
+# has finished (e.g. when the user triggers a UI upgrade later on).
+mkdir -p $PBIN
+cp -f ${PTEMPPATH}/version.sh $PBIN/version.sh
+
+# Effective target version: a version picked earlier in the web UI
+# (installed-version.json, persisted across plugin upgrades) always wins
+# over the version.sh baseline shipped with this plugin release.
+TARGET_VERSION=$ZIGBEE2MQTT_VERSION
+if [ -f "$PCONFIG/installed-version.json" ]; then
+    PINNED_VERSION=$(php -r '$d=json_decode(file_get_contents($argv[1]),true); if(isset($d["zigbee2mqttVersion"])) echo $d["zigbee2mqttVersion"];' "$PCONFIG/installed-version.json")
+    if [ -n "$PINNED_VERSION" ]; then
+        echo "<INFO> Using previously selected zigbee2mqtt version $PINNED_VERSION instead of plugin baseline $ZIGBEE2MQTT_VERSION"
+        TARGET_VERSION=$PINNED_VERSION
+    fi
 fi
 
-git clone --branch $ZIGBEE2MQTT_VERSION --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-
-cd /opt/zigbee2mqtt
-
-# Get system architecture
-ARCH=$(uname -m)
-
-# Map architecture to Node.js download URL
-case $ARCH in
-  x86_64)
-    NODE_ARCH="x64"
-    ;;
-  aarch64)
-    NODE_ARCH="arm64"
-    ;;
-  armv7l)
-    NODE_ARCH="armv7l"
-    ;;
-  *)
-    echo "Unsupported architecture: $ARCH"
-    exit 1
-    ;;
-esac
-
-# NODE_VERSION is set in version.sh
-
-wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
-tar -xvf node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
-mkdir -p /opt/zigbee2mqtt/node
-mv node-$NODE_VERSION-linux-$NODE_ARCH/* /opt/zigbee2mqtt/node/
-rm -rf node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
-export PATH=/opt/zigbee2mqtt/node/bin:$PATH
-
-
-npm install -g pnpm
-node --version  
-pnpm --version  
-pnpm i --frozen-lockfile
-
-# Build Zigbee2MQTT
-pnpm run build
+echo "<INFO> Installing zigbee2mqtt $TARGET_VERSION"
+FALLBACK_NODE_VERSION=$NODE_VERSION $PSBIN/install-zigbee2mqtt.sh "$TARGET_VERSION" --from-plugin-install
 retval="$?"
 if [ $retval -ne 0 ]; then
-    echo "npm install failed"
+    echo "<ERROR> Installation of zigbee2mqtt $TARGET_VERSION failed"
     exit $retval
 fi
 
-echo "<INFO> Remove default data folder"
-rm -f -r /opt/zigbee2mqtt/data
-
-chown -R loxberry:loxberry /opt/zigbee2mqtt
-
 echo "<INFO> Remove temporary folders"
 rm -f -r /tmp/$PTEMPDIR\_upgrade
-
-echo "<INFO> Linking log to log folder"
-ln -f -s $PLOG /opt/zigbee2mqtt/log
-
-echo "<INFO> Updating data folder"
-ln -f -s $PDATA /opt/zigbee2mqtt/data
-
-echo "<INFO> Refresh config"
-php $PBIN/update-config.php
-
-chown loxberry:loxberry $PDATA/* -R
 
 # if we have a new installation we setup the encryption
 # https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
