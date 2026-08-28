@@ -64,15 +64,15 @@ if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
 
     #Replace service config in backup because it is copied back in the next step
     if [ -d "$LBHOMEDIR/config/plugins/$PDIR" ]; then
-        cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/$PTEMPDIR\_upgrade/config/$PDIR/
+        cp -f -r $LBHOMEDIR/config/plugins/$PDIR/*.service /tmp/${PTEMPDIR}_upgrade/config/$PDIR/
     fi
 
     echo "<INFO> Copy back existing config files"
-    if [ -d "/tmp/$PTEMPDIR\_upgrade/config/$PDIR" ]; then
-        cp -f -r /tmp/$PTEMPDIR\_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
+    if [ -d "/tmp/${PTEMPDIR}_upgrade/config/$PDIR" ]; then
+        cp -f -r /tmp/${PTEMPDIR}_upgrade/config/$PDIR/* $LBHOMEDIR/config/plugins/$PDIR/
     fi
-    if [ -d "/tmp/$PTEMPDIR\_upgrade/data/$PDIR" ]; then
-        cp -f -r /tmp/$PTEMPDIR\_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
+    if [ -d "/tmp/${PTEMPDIR}_upgrade/data/$PDIR" ]; then
+        cp -f -r /tmp/${PTEMPDIR}_upgrade/data/$PDIR/* $LBHOMEDIR/data/plugins/$PDIR/
     fi
 fi
 
@@ -134,7 +134,7 @@ rm -f -r /opt/zigbee2mqtt/data
 chown -R loxberry:loxberry /opt/zigbee2mqtt
 
 echo "<INFO> Remove temporary folders"
-rm -f -r /tmp/$PTEMPDIR\_upgrade
+rm -f -r /tmp/${PTEMPDIR}_upgrade
 
 echo "<INFO> Linking log to log folder"
 ln -f -s $PLOG /opt/zigbee2mqtt/log
