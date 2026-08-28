@@ -75,7 +75,18 @@ VERSIONFILE=$PCONFIG/installed-version.json
 # the plugin's own (loxberry-owned) config folder instead.
 LOCKFILE=$PCONFIG/install.lock
 mkdir -p "$PCONFIG"
-exec 9>"$LOCKFILE"
+if ! exec 9>"$LOCKFILE" 2>/dev/null; then
+    # A stale install.lock not writable by loxberry (e.g. restored root-owned
+    # by postroot.sh across an upgrade on an older plugin version, see
+    # preupgrade.sh) would otherwise wedge every future install/upgrade with
+    # a misleading "Permission denied" error. Removing it only needs write
+    # permission on $PCONFIG, not ownership of the file itself.
+    rm -f "$LOCKFILE"
+    if ! exec 9>"$LOCKFILE"; then
+        echo "<ERROR> Could not create lock file $LOCKFILE (permission problem)."
+        exit 1
+    fi
+fi
 if ! flock -n 9; then
     echo "<ERROR> Another zigbee2mqtt install/upgrade is already running."
     exit 1

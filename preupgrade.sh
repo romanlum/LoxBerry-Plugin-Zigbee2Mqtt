@@ -78,5 +78,14 @@ echo "<INFO> Backing up existing files"
 cp -v -r $PCONFIG/ /tmp/${PTEMPDIR}_upgrade/config
 cp -v -r $PDATA/ /tmp/${PTEMPDIR}_upgrade/data
 
+# install.lock and upgrade-state.json are transient runtime state written by
+# install-zigbee2mqtt.sh, not config to preserve across an upgrade. If they
+# were backed up here, postroot.sh (running as root) would restore them with
+# a plain cp, leaving install.lock root-owned and permanently unwritable by
+# loxberry - wedging every future install/upgrade with a misleading
+# "Permission denied" / "Another install already running" error.
+rm -f /tmp/${PTEMPDIR}_upgrade/config/$PDIR/install.lock
+rm -f /tmp/${PTEMPDIR}_upgrade/config/$PDIR/upgrade-state.json
+
 # Exit with Status 0
 exit 0
