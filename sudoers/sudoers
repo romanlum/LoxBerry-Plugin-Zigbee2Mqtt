@@ -20,4 +20,4 @@
 # systemctl needs no rule here: LoxBerry's own default sudoers
 # (system/sudoers/lbdefaults) already grants loxberry unrestricted
 # "NOPASSWD: /bin/systemctl".
-loxberry ALL = NOPASSWD: /bin/rm -rf /opt/zigbee2mqtt.new, /bin/rm -rf /opt/zigbee2mqtt.old, /bin/rm -rf /opt/zigbee2mqtt, /bin/mkdir -p /opt/zigbee2mqtt.new, /bin/chown loxberry:loxberry /opt/zigbee2mqtt.new, /bin/mv /opt/zigbee2mqtt /opt/zigbee2mqtt.old, /bin/mv /opt/zigbee2mqtt.new /opt/zigbee2mqtt, /bin/mv /opt/zigbee2mqtt.old /opt/zigbee2mqtt
+loxberry ALL = NOPASSWD: /bin/rm -rf /opt/zigbee2mqtt.new, /bin/rm -rf /opt/zigbee2mqtt.old, /bin/rm -rf /opt/zigbee2mqtt, /bin/mkdir -p /opt/zigbee2mqtt.new, /bin/chown loxberry\:loxberry /opt/zigbee2mqtt.new, /bin/mv /opt/zigbee2mqtt /opt/zigbee2mqtt.old, /bin/mv /opt/zigbee2mqtt.new /opt/zigbee2mqtt, /bin/mv /opt/zigbee2mqtt.old /opt/zigbee2mqtt
