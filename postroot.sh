@@ -95,7 +95,12 @@ if [ -f "$PCONFIG/installed-version.json" ]; then
 fi
 
 echo "<INFO> Installing zigbee2mqtt $TARGET_VERSION"
-FALLBACK_NODE_VERSION=$NODE_VERSION $PBIN/install-zigbee2mqtt.sh "$TARGET_VERSION" --from-plugin-install
+# This script runs as root, but install-zigbee2mqtt.sh is meant to run as
+# loxberry (git clone/Node/pnpm unprivileged, escalating only for the
+# specific /opt and systemctl operations it needs via sudo - see
+# sudoers/sudoers) - so drop to loxberry here rather than calling it
+# directly, which would run the whole thing as root instead.
+sudo -u loxberry $PBIN/install-zigbee2mqtt.sh "$TARGET_VERSION" --from-plugin-install "$NODE_VERSION"
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "<ERROR> Installation of zigbee2mqtt $TARGET_VERSION failed"

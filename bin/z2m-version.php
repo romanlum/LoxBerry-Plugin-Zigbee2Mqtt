@@ -152,9 +152,9 @@ function z2mUpgradeHandoverExpired($started)
 
 /**
  * Checks whether $pid is still running install-zigbee2mqtt.sh, via /proc
- * rather than kill -0: the web server user has no signal permission on the
- * root-owned installer process, so kill -0 cannot tell "running" from
- * "already gone" here - only existence + cmdline in /proc can.
+ * rather than kill -0: kill -0 only confirms *some* process has this pid,
+ * which - once it exits - the kernel is free to reassign to something
+ * unrelated. Checking /proc/$pid/cmdline confirms it's still this script.
  */
 function z2mProcessIsRunning($pid)
 {

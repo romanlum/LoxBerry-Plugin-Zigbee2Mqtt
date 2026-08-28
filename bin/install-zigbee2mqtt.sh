@@ -9,13 +9,27 @@
 # Called from two places:
 #   - postroot.sh, during plugin install/upgrade (pass --from-plugin-install;
 #     at that point the systemd unit is not linked yet, so this script will
-#     not try to stop/start it - postroot.sh does that once afterwards)
-#   - webfrontend/htmlauth/ajax.php, dispatched via sudo when the user picks
-#     a version on the "Version" tab
+#     not try to stop/start it - postroot.sh does that once afterwards).
+#     postroot.sh runs as root, but drops to the loxberry user (sudo -u
+#     loxberry) before calling this script, for the same reason described
+#     below.
+#   - webfrontend/htmlauth/ajax.php, run directly (no sudo) as the loxberry
+#     user, when the user picks a version on the "Version" tab.
 #
-# Usage: install-zigbee2mqtt.sh <zigbee2mqtt-version> [--from-plugin-install]
+# Usage: install-zigbee2mqtt.sh <zigbee2mqtt-version> [--from-plugin-install] [<fallback-node-version>]
 #
-# Must run as root.
+# Runs as the loxberry user. git clone, the Node.js download and the
+# npm/pnpm install+build - the actual attack surface, since they run
+# network-fetched, third-party build tooling - are all unprivileged. Root is
+# only needed for a handful of mechanical filesystem operations that must
+# touch /opt itself (root:root, not writable by loxberry: creating/removing
+# the top-level /opt/zigbee2mqtt.new and /opt/zigbee2mqtt.old entries, and
+# the final swap) and for systemctl. Those go through sudo with fixed
+# arguments (see sudoers/sudoers) rather than running the whole script as
+# root, so a compromised loxberry account can't turn this script into
+# arbitrary root code execution - only into the exact mv/rm/install one-liners
+# granted there. systemctl itself needs no plugin-specific rule: LoxBerry's
+# own default sudoers already grants loxberry unrestricted "sudo /bin/systemctl".
 
 set -u
 
@@ -29,12 +43,13 @@ fi
 
 VERSION="${1:-}"
 FROM_PLUGIN_INSTALL=0
+FALLBACK_NODE_VERSION="${3:-}"
 if [ "${2:-}" = "--from-plugin-install" ]; then
     FROM_PLUGIN_INSTALL=1
 fi
 
 if [ -z "$VERSION" ]; then
-    echo "<ERROR> No zigbee2mqtt version given. Usage: $0 <version> [--from-plugin-install]"
+    echo "<ERROR> No zigbee2mqtt version given. Usage: $0 <version> [--from-plugin-install] [<fallback-node-version>]"
     exit 1
 fi
 
@@ -56,6 +71,8 @@ OLD=/opt/zigbee2mqtt.old
 STATEFILE=$PCONFIG/upgrade-state.json
 VERSIONFILE=$PCONFIG/installed-version.json
 
+# /var/lock is world-writable (sticky bit) on Debian/Raspbian, so this works
+# unprivileged.
 LOCKFILE=/var/lock/zigbee2mqtt-install.lock
 exec 9>"$LOCKFILE"
 if ! flock -n 9; then
@@ -85,13 +102,12 @@ write_state() {
     "message": $(php -r 'echo json_encode($argv[1]);' "$message" 2>/dev/null || echo "\"$message\"")
 }
 EOF
-    chown loxberry:loxberry "$STATEFILE" 2>/dev/null || true
 }
 
 fail() {
     echo "<ERROR> $1"
     write_state "failed" "$1"
-    rm -rf "$NEW"
+    sudo /bin/rm -rf "$NEW"
     exit 1
 }
 
@@ -108,7 +124,13 @@ if [ -z "$AVAILABLE_KB" ] || [ "$AVAILABLE_KB" -lt 1048576 ]; then
     fail "Not enough free disk space in /opt (need at least 1 GB free)."
 fi
 
-rm -rf "$NEW" "$OLD"
+sudo /bin/rm -rf "$NEW"
+sudo /bin/rm -rf "$OLD"
+
+# $NEW is created root-owned, then handed to loxberry, so everything
+# cloned/built into it below can run unprivileged.
+sudo /bin/mkdir -p "$NEW"
+sudo /bin/chown loxberry:loxberry "$NEW"
 
 echo "<INFO> Cloning zigbee2mqtt $VERSION"
 if ! git clone --branch "$VERSION" --depth 1 https://github.com/Koenkk/zigbee2mqtt.git "$NEW"; then
@@ -192,7 +214,7 @@ resolve_node_version() {
 
 # Plugin-pinned baseline: prefer the copy persisted at install time
 # ($PBIN/version.sh, see postroot.sh), else the value passed down by
-# postroot.sh via FALLBACK_NODE_VERSION, else a last-resort constant.
+# postroot.sh as the 3rd argument, else a last-resort constant.
 fallback_node_version() {
     if [ -n "${FALLBACK_NODE_VERSION:-}" ]; then
         echo "$FALLBACK_NODE_VERSION"
@@ -251,8 +273,6 @@ echo "<INFO> Linking log and data folders"
 ln -f -s "$PLOG" "$NEW/log"
 ln -f -s "$PDATA" "$NEW/data"
 
-chown -R loxberry:loxberry "$NEW"
-
 # The systemd unit is only linked once the plugin's own install has
 # completed (postroot.sh does that after this script returns), so during a
 # fresh plugin install there is nothing to stop/start here yet.
@@ -263,30 +283,29 @@ fi
 
 if [ "$UNIT_EXISTS" -eq 1 ]; then
     echo "<INFO> Stopping zigbee2mqtt service"
-    systemctl stop zigbee2mqtt
+    sudo /bin/systemctl stop zigbee2mqtt
 fi
 
 echo "<INFO> Swapping in new version"
 if [ -e "$CUR" ]; then
-    mv "$CUR" "$OLD"
+    sudo /bin/mv "$CUR" "$OLD"
 fi
-mv "$NEW" "$CUR"
+sudo /bin/mv "$NEW" "$CUR"
 
 echo "<INFO> Refreshing configuration"
 php "$PBIN/update-config.php"
-chown loxberry:loxberry "$PDATA"/* -R 2>/dev/null
 
 if [ "$UNIT_EXISTS" -eq 1 ]; then
     echo "<INFO> Starting zigbee2mqtt service"
-    systemctl daemon-reload
-    systemctl start zigbee2mqtt
+    sudo /bin/systemctl daemon-reload
+    sudo /bin/systemctl start zigbee2mqtt
     sleep 3
     if ! systemctl is-active --quiet zigbee2mqtt; then
         echo "<ERROR> zigbee2mqtt $VERSION failed to start, rolling back"
-        rm -rf "$CUR"
+        sudo /bin/rm -rf "$CUR"
         if [ -e "$OLD" ]; then
-            mv "$OLD" "$CUR"
-            systemctl start zigbee2mqtt
+            sudo /bin/mv "$OLD" "$CUR"
+            sudo /bin/systemctl start zigbee2mqtt
         fi
         write_state "failed" "zigbee2mqtt $VERSION failed to start. Rolled back to the previous installation."
         exit 1
@@ -306,10 +325,9 @@ if [ "$FROM_PLUGIN_INSTALL" -eq 0 ]; then
     "installedAt": "$(now)"
 }
 EOF
-    chown loxberry:loxberry "$VERSIONFILE" 2>/dev/null || true
 fi
 
-rm -rf "$OLD"
+sudo /bin/rm -rf "$OLD"
 
 write_state "success" "zigbee2mqtt $VERSION installed successfully."
 echo "<OK> zigbee2mqtt $VERSION installed successfully."

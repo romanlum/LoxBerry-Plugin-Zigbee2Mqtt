@@ -189,7 +189,10 @@ function startUpgrade($version)
     z2mResetLog();
     z2mMarkUpgradeRunning($version);
 
-    $cmd = "sudo " . LBPBINDIR . "/install-zigbee2mqtt.sh " . escapeshellarg($version);
+    // install-zigbee2mqtt.sh runs as loxberry (this process's user) and
+    // only escalates internally, via sudo, for the specific /opt and
+    // systemctl operations it needs - see sudoers/sudoers.
+    $cmd = LBPBINDIR . "/install-zigbee2mqtt.sh " . escapeshellarg($version);
     exec("nohup setsid $cmd >> " . escapeshellarg(Z2M_UPGRADE_LOG) . " 2>&1 &");
 
     LOGOK("Upgrade to $version started");
