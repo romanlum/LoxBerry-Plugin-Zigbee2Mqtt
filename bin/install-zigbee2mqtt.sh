@@ -293,14 +293,21 @@ if [ "$UNIT_EXISTS" -eq 1 ]; then
     fi
 fi
 
-cat > "$VERSIONFILE" <<EOF
+# $VERSIONFILE records the version the *user* picked on the Version tab, and
+# preupgrade.sh/postroot.sh let it override the plugin's version.sh baseline
+# on every later plugin upgrade. Writing it here during the plugin's own
+# install would pin that baseline as if the user had chosen it, so no future
+# plugin release could ever ship a newer zigbee2mqtt.
+if [ "$FROM_PLUGIN_INSTALL" -eq 0 ]; then
+    cat > "$VERSIONFILE" <<EOF
 {
     "zigbee2mqttVersion": "$VERSION",
     "nodeVersion": "$NODE_VERSION_TO_INSTALL",
     "installedAt": "$(now)"
 }
 EOF
-chown loxberry:loxberry "$VERSIONFILE" 2>/dev/null || true
+    chown loxberry:loxberry "$VERSIONFILE" 2>/dev/null || true
+fi
 
 rm -rf "$OLD"
 

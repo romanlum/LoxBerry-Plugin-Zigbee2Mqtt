@@ -9,6 +9,12 @@ define('Z2M_UPGRADE_LOG', LBPLOGDIR . '/upgrade.log');
 define('Z2M_RELEASES_CACHE', LBPDATADIR . '/releases-cache.json');
 define('Z2M_RELEASES_CACHE_TTL', 3600);
 
+// How long a "running" state may stay pid-less before it is considered dead.
+// z2mMarkUpgradeRunning() cannot know the pid yet; the installer stamps the
+// real one with its own first write_state, which happens within seconds of
+// the dispatch. Anything still pid-less well past that never started.
+define('Z2M_UPGRADE_HANDOVER_TIMEOUT', 120);
+
 /**
  * Returns the version of the currently installed zigbee2mqtt, or null if
  * none is installed yet.
@@ -105,15 +111,43 @@ function z2mGetUpgradeState($logLines = 200)
         }
     }
 
-    if ($state['status'] === 'running' && !empty($state['pid'])) {
-        if (!z2mProcessIsRunning((int) $state['pid'])) {
+    if ($state['status'] === 'running') {
+        if (!empty($state['pid'])) {
+            if (!z2mProcessIsRunning((int) $state['pid'])) {
+                $state['status'] = 'failed';
+                $state['message'] = 'The upgrade process is no longer running.';
+            }
+        } elseif (z2mUpgradeHandoverExpired($state['started'])) {
             $state['status'] = 'failed';
-            $state['message'] = 'The upgrade process is no longer running.';
+            $state['message'] = 'The upgrade process could not be started.';
         }
     }
 
     $state['log'] = z2mGetLogTail($logLines);
     return $state;
+}
+
+/**
+ * True once the handover window between z2mMarkUpgradeRunning() and the
+ * installer's own first state write has elapsed. A state still carrying no
+ * pid by then means the dispatch never reached the script (e.g. a missing
+ * sudoers rule), and without this it would stay "running" forever: the UI
+ * would poll indefinitely and every later upgrade would be refused as
+ * already running, with no way to clear it from the web UI.
+ *
+ * A missing or unparsable timestamp counts as expired - failing the job is
+ * recoverable, wedging it is not.
+ */
+function z2mUpgradeHandoverExpired($started)
+{
+    if (!is_string($started) || $started === '') {
+        return true;
+    }
+    $timestamp = strtotime($started);
+    if ($timestamp === false) {
+        return true;
+    }
+    return (time() - $timestamp) > Z2M_UPGRADE_HANDOVER_TIMEOUT;
 }
 
 /**
