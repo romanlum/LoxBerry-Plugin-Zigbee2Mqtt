@@ -70,13 +70,13 @@ if [ $retVal -ne 0 ]; then
 fi
 
 echo "<INFO> Creating temporary folders for upgrading"
-mkdir /tmp/$PTEMPDIR\_upgrade
-mkdir /tmp/$PTEMPDIR\_upgrade/config
-mkdir /tmp/$PTEMPDIR\_upgrade/data
+mkdir /tmp/${PTEMPDIR}_upgrade
+mkdir /tmp/${PTEMPDIR}_upgrade/config
+mkdir /tmp/${PTEMPDIR}_upgrade/data
 
 echo "<INFO> Backing up existing files"
-cp -v -r $PCONFIG/ /tmp/$PTEMPDIR\_upgrade/config
-cp -v -r $PDATA/ /tmp/$PTEMPDIR\_upgrade/data
+cp -v -r $PCONFIG/ /tmp/${PTEMPDIR}_upgrade/config
+cp -v -r $PDATA/ /tmp/${PTEMPDIR}_upgrade/data
 
 # Exit with Status 0
 exit 0
