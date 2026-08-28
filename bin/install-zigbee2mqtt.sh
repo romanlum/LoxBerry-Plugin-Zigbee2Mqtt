@@ -71,9 +71,10 @@ OLD=/opt/zigbee2mqtt.old
 STATEFILE=$PCONFIG/upgrade-state.json
 VERSIONFILE=$PCONFIG/installed-version.json
 
-# /var/lock is world-writable (sticky bit) on Debian/Raspbian, so this works
-# unprivileged.
-LOCKFILE=/var/lock/zigbee2mqtt-install.lock
+# /var/lock isn't reliably writable by loxberry, so the lock file lives in
+# the plugin's own (loxberry-owned) config folder instead.
+LOCKFILE=$PCONFIG/install.lock
+mkdir -p "$PCONFIG"
 exec 9>"$LOCKFILE"
 if ! flock -n 9; then
     echo "<ERROR> Another zigbee2mqtt install/upgrade is already running."
