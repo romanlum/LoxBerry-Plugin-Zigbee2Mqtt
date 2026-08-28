@@ -46,11 +46,13 @@ PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
 #!/bin/bash
-if [ -e /opt/zigbee2mqtt/data ]; then
-	echo "<INFO> Removing zigbee2mqtt symlink from plugin before update"
-	unlink /opt/zigbee2mqtt/data
-	echo "<INFO> The data symlink will be recreated during installation"
-fi
+
+# Note: the data/log symlinks are no longer touched here. install-zigbee2mqtt.sh
+# builds the new version in /opt/zigbee2mqtt.new (linking data/log there) and only
+# swaps it over /opt/zigbee2mqtt once the build fully succeeds, so the currently
+# running installation must stay intact until then. Unlinking it here unconditionally
+# used to leave a failed upgrade (e.g. not enough disk space) with a broken data link,
+# since nothing would recreate it if install-zigbee2mqtt.sh never reached the swap.
 
 echo "<INFO> Stopping service if already running"
 if systemctl is-active --quiet zigbee2mqtt; then

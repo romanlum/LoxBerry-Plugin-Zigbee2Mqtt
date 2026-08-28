@@ -6,6 +6,7 @@ require_once "model/ServiceConfig.php";
 require_once "model/MqttConfig.php";
 require_once LBPBINDIR . "/defines.php";
 require_once LBPBINDIR . "/formHelper.php";
+require_once LBPBINDIR . "/z2m-version.php";
 
 $log = LBLog::newLog(["name" => "Service"]);
 
@@ -25,6 +26,14 @@ if (isset($_GET["action"])) {
         sendresponse(200, "application/json", applyChanges());
     } else if ($action == "getPid") {
         sendresponse(200, "application/json", getPid());
+    } else if ($action == "getVersionInfo") {
+        sendresponse(200, "application/json", getVersionInfo());
+    } else if ($action == "startUpgrade") {
+        if (isset($_POST["version"])) {
+            startUpgrade($_POST["version"]);
+        }
+    } else if ($action == "getUpgradeStatus") {
+        sendresponse(200, "application/json", json_encode(z2mGetUpgradeState()));
     }
 }
 
@@ -127,6 +136,68 @@ function getPid()
     //fetches the pid or 0 if not running
     $pid = shell_exec("systemctl show --property MainPID --value zigbee2mqtt");
     return "{\"pid\":$pid }";
+}
+
+/**
+ * Returns installed/pinned zigbee2mqtt version, the list of available
+ * releases and the current upgrade job state, for the Version tab.
+ */
+function getVersionInfo()
+{
+    $info = [
+        "installedVersion" => z2mGetInstalledVersion(),
+        "pinnedVersion" => z2mGetPinnedVersion(),
+        "releases" => z2mGetAvailableReleases(),
+        "upgrade" => z2mGetUpgradeState(0),
+    ];
+    return json_encode($info);
+}
+
+/**
+ * Starts a zigbee2mqtt upgrade to the given version in the background and
+ * returns immediately - the build can take several minutes, far longer than
+ * a single PHP request/response cycle should block for. Progress is polled
+ * separately via getUpgradeStatus.
+ */
+function startUpgrade($version)
+{
+    LOGSTART("Start zigbee2mqtt version upgrade");
+
+    if (!z2mIsValidVersionString($version)) {
+        LOGERR("Rejected invalid version string");
+        LOGEND("Upgrade not started");
+        sendresponse(400, "application/json", '{"error":"Invalid version."}');
+        exit(1);
+    }
+
+    $releases = z2mGetAvailableReleases();
+    if (!in_array($version, $releases, true)) {
+        LOGERR("Rejected version not in known release list: $version");
+        LOGEND("Upgrade not started");
+        sendresponse(400, "application/json", '{"error":"Unknown zigbee2mqtt version."}');
+        exit(1);
+    }
+
+    $state = z2mGetUpgradeState(0);
+    if ($state["status"] === "running") {
+        LOGERR("An upgrade is already running");
+        LOGEND("Upgrade not started");
+        sendresponse(409, "application/json", '{"error":"An upgrade is already running."}');
+        exit(1);
+    }
+
+    z2mResetLog();
+    z2mMarkUpgradeRunning($version);
+
+    // install-zigbee2mqtt.sh runs as loxberry (this process's user) and
+    // only escalates internally, via sudo, for the specific /opt and
+    // systemctl operations it needs - see sudoers/sudoers.
+    $cmd = LBPBINDIR . "/install-zigbee2mqtt.sh " . escapeshellarg($version);
+    exec("nohup setsid $cmd >> " . escapeshellarg(Z2M_UPGRADE_LOG) . " 2>&1 &");
+
+    LOGOK("Upgrade to $version started");
+    LOGEND("Upgrade dispatched");
+    sendresponse(200, "application/json", '{"result":true}');
 }
 
 function sendresponse($httpstatus, $contenttype, $response = null)

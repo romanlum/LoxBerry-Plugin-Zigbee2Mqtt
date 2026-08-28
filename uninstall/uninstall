@@ -70,5 +70,8 @@ if [ -e /opt/zigbee2mqtt ]; then
     rm -f -r /opt/zigbee2mqtt
 fi
 
+echo "<INFO> Removing any leftover upgrade staging folders"
+rm -f -r /opt/zigbee2mqtt.new /opt/zigbee2mqtt.old
+
 # Exit with Status 0
 exit 0
