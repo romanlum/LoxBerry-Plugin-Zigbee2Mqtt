@@ -153,6 +153,27 @@ function z2mResetLog()
 }
 
 /**
+ * Marks the upgrade state "running" synchronously before the background
+ * install script is dispatched. Without this, a client polling right after
+ * startUpgrade() could still see the previous job's leftover "success" or
+ * "failed" state - the script only overwrites it with "running" itself once
+ * it gets to run, which (via sudo/nohup/setsid) is not instant - and stop
+ * polling before any progress ever shows up.
+ */
+function z2mMarkUpgradeRunning($version)
+{
+    $state = [
+        'status' => 'running',
+        'version' => $version,
+        'pid' => null,
+        'started' => gmdate('Y-m-d\TH:i:s\Z'),
+        'finished' => null,
+        'message' => '',
+    ];
+    file_put_contents(Z2M_STATE_FILE, json_encode($state));
+}
+
+/**
  * Validates a version string before it is passed to the shell / matched
  * against the known release list.
  */
