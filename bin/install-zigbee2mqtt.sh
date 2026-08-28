@@ -278,6 +278,7 @@ chown loxberry:loxberry "$PDATA"/* -R 2>/dev/null
 
 if [ "$UNIT_EXISTS" -eq 1 ]; then
     echo "<INFO> Starting zigbee2mqtt service"
+    systemctl daemon-reload
     systemctl start zigbee2mqtt
     sleep 3
     if ! systemctl is-active --quiet zigbee2mqtt; then
