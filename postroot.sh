@@ -99,6 +99,14 @@ FALLBACK_NODE_VERSION=$NODE_VERSION $PBIN/install-zigbee2mqtt.sh "$TARGET_VERSIO
 retval="$?"
 if [ $retval -ne 0 ]; then
     echo "<ERROR> Installation of zigbee2mqtt $TARGET_VERSION failed"
+    # install-zigbee2mqtt.sh builds the new version separately and only swaps
+    # it in on success, so the previous installation is still intact here.
+    # preroot.sh already stopped it - restart it so a failed upgrade doesn't
+    # leave zigbee2mqtt down on top of failing.
+    if [ -e /etc/systemd/system/zigbee2mqtt.service ]; then
+        echo "<INFO> Restarting previous zigbee2mqtt installation"
+        systemctl start zigbee2mqtt
+    fi
     exit $retval
 fi
 
