@@ -5,7 +5,19 @@
 # system/sudoers/<pluginname>, so paths below must be hardcoded absolute
 # paths, not $LBPBIN or similar.
 #
-# Grants the web server user passwordless sudo to run the zigbee2mqtt
-# installer, used from webfrontend/htmlauth/ajax.php for UI-triggered
-# version upgrades (see bin/install-zigbee2mqtt.sh).
-loxberry ALL = NOPASSWD: /opt/loxberry/bin/plugins/zigbee2mqtt/install-zigbee2mqtt.sh
+# install-zigbee2mqtt.sh (see bin/install-zigbee2mqtt.sh) runs as the
+# loxberry user - git clone, the Node.js download and the npm/pnpm
+# install+build all run unprivileged. Root is only needed for a handful of
+# mechanical filesystem operations that must touch /opt itself (root:root,
+# not writable by loxberry): creating/removing the top-level
+# /opt/zigbee2mqtt.new and /opt/zigbee2mqtt.old entries, and the final swap.
+# Each rule below is one fixed command with fixed arguments, so this grants
+# "move these exact directories in/out of /opt", not arbitrary root code
+# execution - unlike a rule naming the script itself, which would let anyone
+# able to edit the (loxberry-writable) script turn it into arbitrary root
+# code execution.
+#
+# systemctl needs no rule here: LoxBerry's own default sudoers
+# (system/sudoers/lbdefaults) already grants loxberry unrestricted
+# "NOPASSWD: /bin/systemctl".
+loxberry ALL = NOPASSWD: /bin/rm -rf /opt/zigbee2mqtt.new, /bin/rm -rf /opt/zigbee2mqtt.old, /bin/rm -rf /opt/zigbee2mqtt, /bin/mkdir -p /opt/zigbee2mqtt.new, /bin/chown loxberry:loxberry /opt/zigbee2mqtt.new, /bin/mv /opt/zigbee2mqtt /opt/zigbee2mqtt.old, /bin/mv /opt/zigbee2mqtt.new /opt/zigbee2mqtt, /bin/mv /opt/zigbee2mqtt.old /opt/zigbee2mqtt
