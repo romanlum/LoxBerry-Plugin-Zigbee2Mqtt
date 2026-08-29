@@ -1,0 +1,10 @@
+{
+  "name": "zigbee2mqtt-wsproxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket relay for the Zigbee2Mqtt LoxBerry plugin's proxied web UI",
+  "main": "wsproxy.js",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

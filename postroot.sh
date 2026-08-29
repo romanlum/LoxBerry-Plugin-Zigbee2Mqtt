@@ -166,5 +166,20 @@ systemctl daemon-reload
 systemctl enable zigbee2mqtt
 systemctl start zigbee2mqtt
 
+echo "<INFO> Setting up zigbee2mqtt wsproxy (WebSocket relay for the proxied web UI)"
+mkdir -p /opt/zigbee2mqtt/wsproxy
+cp -f $PBIN/wsproxy/wsproxy.js $PBIN/wsproxy/package.json /opt/zigbee2mqtt/wsproxy/
+(cd /opt/zigbee2mqtt/wsproxy && npm install --omit=dev)
+bash $PBIN/wsproxy/resolve-cert.sh /opt/zigbee2mqtt/wsproxy/tls
+chown -R loxberry:loxberry /opt/zigbee2mqtt/wsproxy
+
+echo "<INFO> Updating wsproxy service config"
+ln -f -s $PCONFIG/zigbee2mqtt-wsproxy.service /etc/systemd/system/zigbee2mqtt-wsproxy.service
+
+# Enable auto-start of the wsproxy service
+systemctl daemon-reload
+systemctl enable zigbee2mqtt-wsproxy
+systemctl start zigbee2mqtt-wsproxy
+
 # Exit with Status 0
 exit 0

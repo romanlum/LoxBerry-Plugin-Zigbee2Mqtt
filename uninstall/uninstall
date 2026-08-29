@@ -65,6 +65,14 @@ if [ -e  /etc/systemd/system/zigbee2mqtt.service ]; then
     systemctl daemon-reload
 fi
 
+echo "<INFO> Stopping wsproxy service if already running"
+if [ -e  /etc/systemd/system/zigbee2mqtt-wsproxy.service ]; then
+	systemctl stop zigbee2mqtt-wsproxy
+    systemctl disable zigbee2mqtt-wsproxy
+    unlink /etc/systemd/system/zigbee2mqtt-wsproxy.service
+    systemctl daemon-reload
+fi
+
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
     rm -f -r /opt/zigbee2mqtt

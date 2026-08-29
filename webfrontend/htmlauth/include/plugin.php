@@ -44,7 +44,6 @@ class Plugin
         {
             $navbar[3]['Name'] = $L["Navbar.UI"];
             $navbar[3]['URL'] = 'ui.php';
-            $navbar[3]['CSS'] = 'ui.css';
             $navbar[3]['active'] = null;
         }
        

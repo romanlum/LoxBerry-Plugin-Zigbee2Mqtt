@@ -56,3 +56,8 @@ echo "<INFO> Stopping service if already running"
 if systemctl is-active --quiet zigbee2mqtt; then
 	systemctl stop zigbee2mqtt
 fi
+
+echo "<INFO> Stopping wsproxy service if already running"
+if systemctl is-active --quiet zigbee2mqtt-wsproxy; then
+	systemctl stop zigbee2mqtt-wsproxy
+fi
