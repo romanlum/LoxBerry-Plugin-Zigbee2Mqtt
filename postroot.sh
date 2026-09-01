@@ -115,7 +115,7 @@ rm -rf node-$NODE_VERSION-linux-$NODE_ARCH.tar.xz
 export PATH=/opt/zigbee2mqtt/node/bin:$PATH
 
 
-npm install -g pnpm
+npm install -g "$(node -p "require('./package.json').packageManager")"
 node --version  
 pnpm --version  
 pnpm i --frozen-lockfile
