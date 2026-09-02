@@ -147,6 +147,82 @@ php $PBIN/update-config.php
 
 chown loxberry:loxberry $PDATA/* -R
 
+echo "<INFO> Configuring authenticated Zigbee2MQTT UI proxy"
+APACHE_SYSTEM_DIR="$LBHOMEDIR/system/apache2"
+APACHE_CONF_ENABLED="$APACHE_SYSTEM_DIR/conf-enabled"
+APACHE_MODS_AVAILABLE="$APACHE_SYSTEM_DIR/mods-available"
+APACHE_MODS_ENABLED="$APACHE_SYSTEM_DIR/mods-enabled"
+APACHE_TEMPLATE="$PTEMPPATH/config/zigbee2mqtt-proxy.conf.template"
+APACHE_PROXY_CONF="$PCONFIG/zigbee2mqtt-proxy.conf"
+APACHE_PROXY_LINK="$APACHE_CONF_ENABLED/zigbee2mqtt-${PDIR}.conf"
+
+case "$PDIR" in
+    *[!A-Za-z0-9_-]*|"")
+        echo "<ERROR> Invalid plugin folder for Apache proxy configuration: $PDIR"
+        exit 2
+        ;;
+esac
+
+enable_apache_module() {
+    APACHE_MODULE="$1"
+    APACHE_MODULE_SOURCE="$APACHE_MODS_AVAILABLE/${APACHE_MODULE}.load"
+    APACHE_MODULE_LINK="$APACHE_MODS_ENABLED/${APACHE_MODULE}.load"
+
+    if [ ! -e "$APACHE_MODULE_SOURCE" ]; then
+        echo "<ERROR> Required Apache module is unavailable: $APACHE_MODULE"
+        return 1
+    fi
+
+    if [ ! -e "$APACHE_MODULE_LINK" ] && [ ! -L "$APACHE_MODULE_LINK" ]; then
+        ln -s "../mods-available/${APACHE_MODULE}.load" "$APACHE_MODULE_LINK"
+    fi
+}
+
+if [ ! -d "$APACHE_CONF_ENABLED" ] || [ ! -f "$APACHE_TEMPLATE" ]; then
+    echo "<ERROR> LoxBerry Apache proxy configuration paths are unavailable"
+    exit 2
+fi
+
+enable_apache_module proxy && enable_apache_module proxy_http && enable_apache_module proxy_wstunnel || exit 2
+
+sed "s|__PLUGIN_FOLDER__|$PDIR|g" "$APACHE_TEMPLATE" > "$APACHE_PROXY_CONF.new"
+if [ ! -s "$APACHE_PROXY_CONF.new" ]; then
+    echo "<ERROR> Could not generate Apache proxy configuration"
+    exit 2
+fi
+
+APACHE_PROXY_CONF_EXISTED=0
+if [ -f "$APACHE_PROXY_CONF" ]; then
+    cp -p "$APACHE_PROXY_CONF" "$APACHE_PROXY_CONF.previous"
+    APACHE_PROXY_CONF_EXISTED=1
+fi
+
+if [ -e "$APACHE_PROXY_LINK" ] || [ -L "$APACHE_PROXY_LINK" ]; then
+    if [ "$(readlink -f "$APACHE_PROXY_LINK")" != "$APACHE_PROXY_CONF" ]; then
+        echo "<ERROR> Refusing to replace Apache configuration not owned by this plugin: $APACHE_PROXY_LINK"
+        exit 2
+    fi
+else
+    ln -s "$APACHE_PROXY_CONF" "$APACHE_PROXY_LINK"
+fi
+
+mv "$APACHE_PROXY_CONF.new" "$APACHE_PROXY_CONF"
+if ! apache2ctl -t -f "$APACHE_SYSTEM_DIR/apache2.conf"; then
+    echo "<ERROR> Generated Apache proxy configuration is invalid; restoring previous configuration"
+    if [ "$APACHE_PROXY_CONF_EXISTED" -eq 1 ]; then
+        mv "$APACHE_PROXY_CONF.previous" "$APACHE_PROXY_CONF"
+    else
+        rm -f "$APACHE_PROXY_CONF"
+        unlink "$APACHE_PROXY_LINK"
+    fi
+    exit 2
+fi
+rm -f "$APACHE_PROXY_CONF.previous"
+if ! systemctl reload apache2; then
+    echo "<ERROR> Could not reload Apache after enabling the Zigbee2MQTT UI proxy"
+    exit 2
+fi
+
 # if we have a new installation we setup the encryption
 # https://github.com/romanlum/LoxBerry-Plugin-Zigbee2Mqtt/issues/13
 if [ "$ISUPGRADE" -eq "0" ]; then
