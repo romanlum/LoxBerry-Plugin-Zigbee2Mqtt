@@ -1,0 +1,22 @@
+# This file is generated during installation. Do not edit the generated copy:
+# it will be refreshed on every plugin update.
+
+ProxyRequests Off
+
+# The WebSocket mapping has to come before the HTTP mapping.
+ProxyPass "/admin/plugins/__PLUGIN_FOLDER__/z2m/api" "ws://127.0.0.1:8881/admin/plugins/__PLUGIN_FOLDER__/z2m/api" retry=0 timeout=300
+
+ProxyPass "/admin/plugins/__PLUGIN_FOLDER__/z2m/" "http://127.0.0.1:8881/admin/plugins/__PLUGIN_FOLDER__/z2m/" retry=0 timeout=300
+ProxyPassReverse "/admin/plugins/__PLUGIN_FOLDER__/z2m/" "http://127.0.0.1:8881/admin/plugins/__PLUGIN_FOLDER__/z2m/"
+
+# ProxyPass is handled before the filesystem alias, therefore repeat the
+# authentication policy used by LoxBerry's htmlauth directory.
+<Location "/admin/plugins/__PLUGIN_FOLDER__/z2m/">
+    AuthType Basic
+    AuthName "Loxberry Administration"
+    AuthUserFile ${LBHOMEDIR}/config/system/htusers.dat
+    <RequireAny>
+        Require valid-user
+        Require local
+    </RequireAny>
+</Location>
