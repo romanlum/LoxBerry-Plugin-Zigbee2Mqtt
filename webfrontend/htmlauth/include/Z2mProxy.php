@@ -154,7 +154,7 @@ class Z2mProxy
         // to the document (assets/index-*.js).  Without this rewrite the
         // browser looks for them in the plugin's own directory.
         $html = preg_replace_callback(
-            '/(href|src)=("|\')(assets\/[^"\']*)\2/i',
+            '/(href|src)=("|\')(?:\.\/)?(assets\/[^"\']*)\2/i',
             function ($matches) use ($assetProxyPath) {
                 return $matches[1] . '=' . $matches[2] . $assetProxyPath
                     . '?path=' . rawurlencode('/' . $matches[3]) . $matches[2];
