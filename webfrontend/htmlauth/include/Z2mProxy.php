@@ -70,6 +70,7 @@ class Z2mProxy
 
         $body = substr($response, $headerSize);
         $selfPath = $_SERVER['SCRIPT_NAME'];
+        $assetProxyPath = dirname($selfPath) . '/ui-assets.php';
 
         $isTextResource = $contentType !== null && (
             stripos($contentType, 'text/html') !== false ||
@@ -77,11 +78,11 @@ class Z2mProxy
             stripos($contentType, 'text/css') !== false
         );
         if ($isTextResource) {
-            $body = self::rewriteHtml($body, $selfPath);
+            $body = self::rewriteHtml($body, $assetProxyPath);
         }
 
         http_response_code($status);
-        self::forwardHeaders(substr($response, 0, $headerSize), $selfPath);
+        self::forwardHeaders(substr($response, 0, $headerSize), $assetProxyPath);
         if ($contentType) {
             header('Content-Type: ' . $contentType);
         }
@@ -132,20 +133,20 @@ class Z2mProxy
 
     /**
      * Rewrites root-absolute asset references so they resolve back through
-     * this proxy script (instead of the LoxBerry web root), and injects a
+     * the dedicated asset proxy (instead of the LoxBerry web root), and injects a
      * WebSocket shim that redirects Z2M's live-update socket to the
      * dedicated wss:// relay daemon, since PHP itself cannot proxy it.
      */
-    private static function rewriteHtml($html, $selfPath)
+    private static function rewriteHtml($html, $assetProxyPath)
     {
         // Query based routing works even when Apache has AcceptPathInfo off.
         // It is also used in JavaScript/CSS responses, where Vite may emit
         // additional root-absolute references for lazy-loaded chunks.
         $html = preg_replace_callback(
             '/(href|src)=("|\')\/(?!\/)([^"\']*)\2/i',
-            function ($matches) use ($selfPath) {
-                return $matches[1] . '=' . $matches[2] . $selfPath
-                    . '?_z2m_path=' . rawurlencode('/' . $matches[3]) . $matches[2];
+            function ($matches) use ($assetProxyPath) {
+                return $matches[1] . '=' . $matches[2] . $assetProxyPath
+                    . '?path=' . rawurlencode('/' . $matches[3]) . $matches[2];
             },
             $html
         );
@@ -154,24 +155,24 @@ class Z2mProxy
         // browser looks for them in the plugin's own directory.
         $html = preg_replace_callback(
             '/(href|src)=("|\')(assets\/[^"\']*)\2/i',
-            function ($matches) use ($selfPath) {
-                return $matches[1] . '=' . $matches[2] . $selfPath
-                    . '?_z2m_path=' . rawurlencode('/' . $matches[3]) . $matches[2];
+            function ($matches) use ($assetProxyPath) {
+                return $matches[1] . '=' . $matches[2] . $assetProxyPath
+                    . '?path=' . rawurlencode('/' . $matches[3]) . $matches[2];
             },
             $html
         );
         $html = preg_replace_callback(
             '/(["\'])\/(assets\/[^"\']*)\1/',
-            function ($matches) use ($selfPath) {
-                return $matches[1] . $selfPath . '?_z2m_path='
+            function ($matches) use ($assetProxyPath) {
+                return $matches[1] . $assetProxyPath . '?path='
                     . rawurlencode('/' . $matches[2]) . $matches[1];
             },
             $html
         );
         $html = preg_replace_callback(
             '/url\(\/(assets\/[^\)]*)\)/i',
-            function ($matches) use ($selfPath) {
-                return 'url(' . $selfPath . '?_z2m_path='
+            function ($matches) use ($assetProxyPath) {
+                return 'url(' . $assetProxyPath . '?path='
                     . rawurlencode('/' . $matches[1]) . ')';
             },
             $html
