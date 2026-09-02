@@ -24,9 +24,20 @@ class Z2mProxy
      */
     public static function handleRequest()
     {
-        $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '/';
-        $query = (isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '')
-            ? '?' . $_SERVER['QUERY_STRING']
+        // Do not rely solely on PATH_INFO here.  Some Apache configurations
+        // disable it for PHP files, which makes requests such as
+        // ui.php/assets/index.js return 404 before this script is invoked.
+        // Rewritten asset URLs therefore use _z2m_path as a portable route.
+        $path = isset($_GET['_z2m_path']) ? $_GET['_z2m_path'] :
+            (isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '/');
+        if (!is_string($path) || $path === '' || $path[0] !== '/') {
+            $path = '/';
+        }
+
+        $queryParams = $_GET;
+        unset($queryParams['_z2m_path']);
+        $query = count($queryParams) > 0
+            ? '?' . http_build_query($queryParams)
             : '';
         $upstreamUrl = 'http://' . self::UPSTREAM_HOST . ':' . self::UPSTREAM_PORT . $path . $query;
 
@@ -60,8 +71,12 @@ class Z2mProxy
         $body = substr($response, $headerSize);
         $selfPath = $_SERVER['SCRIPT_NAME'];
 
-        $isHtml = $contentType !== null && stripos($contentType, 'text/html') !== false;
-        if ($isHtml) {
+        $isTextResource = $contentType !== null && (
+            stripos($contentType, 'text/html') !== false ||
+            stripos($contentType, 'javascript') !== false ||
+            stripos($contentType, 'text/css') !== false
+        );
+        if ($isTextResource) {
             $body = self::rewriteHtml($body, $selfPath);
         }
 
@@ -109,7 +124,7 @@ class Z2mProxy
                 continue;
             }
             if (strtolower($name) === 'location' && strpos($value, '/') === 0) {
-                $value = $selfPath . $value;
+                $value = $selfPath . '?_z2m_path=' . rawurlencode($value);
             }
             header($name . ': ' . $value, false);
         }
@@ -123,7 +138,33 @@ class Z2mProxy
      */
     private static function rewriteHtml($html, $selfPath)
     {
-        $html = preg_replace('/(href|src)="\/(?!\/)/', '$1="' . $selfPath . '/', $html);
+        // Query based routing works even when Apache has AcceptPathInfo off.
+        // It is also used in JavaScript/CSS responses, where Vite may emit
+        // additional root-absolute references for lazy-loaded chunks.
+        $html = preg_replace_callback(
+            '/(href|src)=("|\')\/(?!\/)([^"\']*)\2/i',
+            function ($matches) use ($selfPath) {
+                return $matches[1] . '=' . $matches[2] . $selfPath
+                    . '?_z2m_path=' . rawurlencode('/' . $matches[3]) . $matches[2];
+            },
+            $html
+        );
+        $html = preg_replace_callback(
+            '/(["\'])\/(assets\/[^"\']*)\1/',
+            function ($matches) use ($selfPath) {
+                return $matches[1] . $selfPath . '?_z2m_path='
+                    . rawurlencode('/' . $matches[2]) . $matches[1];
+            },
+            $html
+        );
+        $html = preg_replace_callback(
+            '/url\(\/(assets\/[^\)]*)\)/i',
+            function ($matches) use ($selfPath) {
+                return 'url(' . $selfPath . '?_z2m_path='
+                    . rawurlencode('/' . $matches[1]) . ')';
+            },
+            $html
+        );
 
         $shim = '<script>(function(){'
             . 'var NativeWebSocket=window.WebSocket;'
