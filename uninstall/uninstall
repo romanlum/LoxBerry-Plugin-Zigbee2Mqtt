@@ -65,6 +65,19 @@ if [ -e  /etc/systemd/system/zigbee2mqtt.service ]; then
     systemctl daemon-reload
 fi
 
+APACHE_SYSTEM_DIR="$LBHOMEDIR/system/apache2"
+APACHE_PROXY_CONF="$PCONFIG/zigbee2mqtt-proxy.conf"
+APACHE_PROXY_LINK="$APACHE_SYSTEM_DIR/conf-enabled/zigbee2mqtt-${PDIR}.conf"
+if [ -L "$APACHE_PROXY_LINK" ] && [ "$(readlink -f "$APACHE_PROXY_LINK")" = "$APACHE_PROXY_CONF" ]; then
+    echo "<INFO> Removing Zigbee2MQTT Apache proxy configuration"
+    unlink "$APACHE_PROXY_LINK"
+    if apache2ctl -t -f "$APACHE_SYSTEM_DIR/apache2.conf"; then
+        systemctl reload apache2
+    else
+        echo "<WARNING> Apache configuration check failed; Apache was not reloaded"
+    fi
+fi
+
 if [ -e /opt/zigbee2mqtt ]; then
     echo "<INFO> Removing old zigbee2mqtt installation"
     rm -f -r /opt/zigbee2mqtt

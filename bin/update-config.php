@@ -68,8 +68,11 @@ if ($serviceCfg->port != "") {
 $zigbee2mqttConfig["permit_join"] = $serviceCfg->permitJoin;
 
 if (is_enabled($serviceCfg->enableUI)) {
+    $pluginFolder = basename(LBPCONFIGDIR);
     $zigbee2mqttConfig["frontend"]["enabled"] = true;
     $zigbee2mqttConfig["frontend"]["port"] = 8881;
+    $zigbee2mqttConfig["frontend"]["host"] = "127.0.0.1";
+    $zigbee2mqttConfig["frontend"]["base_url"] = "/admin/plugins/" . $pluginFolder . "/z2m";
 } else {
     $zigbee2mqttConfig["frontend"]["enabled"] = false;
 }
