@@ -3,6 +3,7 @@ on:
     branches:
       - 'master'
       - 'feature/**'
+      - 'claude/**'
 
 name: build dev version
 
