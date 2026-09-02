@@ -149,6 +149,17 @@ class Z2mProxy
             },
             $html
         );
+        // Recent Zigbee2MQTT frontend builds may emit Vite assets relative
+        // to the document (assets/index-*.js).  Without this rewrite the
+        // browser looks for them in the plugin's own directory.
+        $html = preg_replace_callback(
+            '/(href|src)=("|\')(assets\/[^"\']*)\2/i',
+            function ($matches) use ($selfPath) {
+                return $matches[1] . '=' . $matches[2] . $selfPath
+                    . '?_z2m_path=' . rawurlencode('/' . $matches[3]) . $matches[2];
+            },
+            $html
+        );
         $html = preg_replace_callback(
             '/(["\'])\/(assets\/[^"\']*)\1/',
             function ($matches) use ($selfPath) {
