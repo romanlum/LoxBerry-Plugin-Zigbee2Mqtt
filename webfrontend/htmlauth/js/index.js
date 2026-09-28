@@ -144,6 +144,60 @@ function viewhide() {
 }
 
 /**
+ * Known coordinators. Values from the vendor documentation; a preset only
+ * fills the form fields, nothing is saved until "Save and apply".
+ * SONOFF Dongle Max / Dongle-M: https://dongle.sonoff.tech/guide/dongle-m/donglem_connecting_to_zigbee2mqtt/
+ */
+const coordinatorPresets = {
+    "dongle-m-net": { port: "tcp://Dongle-M.local:6638", adapter: "ember", baudrate: "115200", rtscts: "false" },
+    "dongle-m-usb": { port: null, adapter: "ember", baudrate: "115200", rtscts: "false" }
+};
+
+/**
+ * Fills port, adapter, baudrate and rtscts from the selected preset.
+ * For USB the port is only kept if it already is a device path - the
+ * device name differs per system, so it is not guessed.
+ */
+function applyPreset() {
+    const preset = coordinatorPresets[$("#coordinatorPreset").val()];
+    if (!preset) {
+        return;
+    }
+    const port = $("#ServiceConfig\\[port\\]");
+    if (preset.port !== null) {
+        port.val(preset.port);
+    } else if (!port.val().startsWith("/dev/")) {
+        port.val("");
+    }
+    $("#ServiceConfig\\[adapter\\]").val(preset.adapter);
+    $("#ServiceConfig\\[baudrate\\]").val(preset.baudrate);
+    const rtscts = $("#ServiceConfig\\[rtscts\\]");
+    rtscts.val(preset.rtscts);
+    try { rtscts.selectmenu("refresh"); } catch (e) { }
+    $("#testportresult").text("");
+}
+
+/**
+ * Asks the backend whether the port in the form is reachable (tcp://) or
+ * present (/dev/...). Tests the value in the form, not the saved one.
+ */
+function testPort() {
+    const result = $("#testportresult");
+    result.css("color", "grey").text("...");
+    const jqxhr = $.post(`ajax.php/?action=testPort`, { port: $("#ServiceConfig\\[port\\]").val() }, null, "json");
+    jqxhr.done(function (data) {
+        let text = result.data(data.message) || data.message;
+        if (data.ip) {
+            text += " (" + data.ip + ")";
+        }
+        result.css("color", data.result ? "green" : "red").text(text);
+    });
+    jqxhr.fail(function () {
+        result.css("color", "red").text("error");
+    });
+}
+
+/**
  * Document ready function
  */
 $(document).ready(function () {
@@ -153,6 +207,12 @@ $(document).ready(function () {
     });
     $("#MqttConfig\\[usemqttgateway\\]").click(function () {
         viewhide();
+    });
+    $("#coordinatorPreset").change(function () {
+        applyPreset();
+    });
+    $("#testport").click(function () {
+        testPort();
     });
 
     fetchFormData("ServiceConfig")
