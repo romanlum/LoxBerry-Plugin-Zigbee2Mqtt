@@ -25,6 +25,8 @@ if (isset($_GET["action"])) {
         sendresponse(200, "application/json", applyChanges());
     } else if ($action == "getPid") {
         sendresponse(200, "application/json", getPid());
+    } else if ($action == "testPort") {
+        sendresponse(200, "application/json", testPort(isset($_POST["port"]) ? $_POST["port"] : ""));
     }
 }
 
@@ -127,6 +129,45 @@ function getPid()
     //fetches the pid or 0 if not running
     $pid = shell_exec("systemctl show --property MainPID --value zigbee2mqtt");
     return "{\"pid\":$pid }";
+}
+
+/**
+ * Checks the coordinator port without touching the service:
+ *   tcp://host:port  - resolves the name and opens a TCP connection (3 s)
+ *   /dev/...         - checks that the device exists and is readable
+ * Only these two forms are accepted; nothing is passed to a shell.
+ */
+function testPort($port)
+{
+    $port = trim((string) $port);
+    if ($port === "") {
+        return json_encode(["result" => false, "message" => "empty"]);
+    }
+    if (preg_match('#^tcp://([A-Za-z0-9.\-]+):([0-9]{1,5})$#', $port, $m)) {
+        $tcpPort = (int) $m[2];
+        if ($tcpPort < 1 || $tcpPort > 65535) {
+            return json_encode(["result" => false, "message" => "invalid"]);
+        }
+        $ip = gethostbyname($m[1]);
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return json_encode(["result" => false, "message" => "unresolved"]);
+        }
+        $fp = @fsockopen($ip, $tcpPort, $errno, $errstr, 3);
+        if ($fp === false) {
+            return json_encode(["result" => false, "message" => "unreachable", "ip" => $ip]);
+        }
+        fclose($fp);
+        return json_encode(["result" => true, "message" => "reachable", "ip" => $ip]);
+    }
+    if (preg_match('#^/dev/[A-Za-z0-9/_.:\-]+$#', $port)) {
+        if (!file_exists($port)) {
+            return json_encode(["result" => false, "message" => "missing"]);
+        }
+        return json_encode(is_readable($port)
+            ? ["result" => true, "message" => "present"]
+            : ["result" => false, "message" => "noaccess"]);
+    }
+    return json_encode(["result" => false, "message" => "invalid"]);
 }
 
 function sendresponse($httpstatus, $contenttype, $response = null)

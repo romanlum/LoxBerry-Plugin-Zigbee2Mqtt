@@ -102,6 +102,26 @@
 
     <div class="lb_flex-container">
         <div class="lb_flex-item-label">
+            <label class="control-label" for="coordinatorPreset">{{'ServiceConfig.LabelPreset' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <!-- no name attribute: the preset only fills the fields below, it is not saved itself -->
+            <select width="100%" id="coordinatorPreset" data-mini="true">
+                <option value="">{{'ServiceConfig.PresetManual' | trans}}</option>
+                <option value="dongle-m-net">SONOFF Dongle Max / Dongle-M (Ethernet, PoE, WiFi)</option>
+                <option value="dongle-m-usb">SONOFF Dongle Max / Dongle-M (USB)</option>
+            </select>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintPreset' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
             <label class="control-label" for="ServiceConfig[port]">{{'ServiceConfig.LabelPort' | trans}}</label>
         </div>
         <div class="lb_flex-item-spacer"></div>
@@ -163,6 +183,30 @@
         <div class="lb_flex-item-spacer"></div>
         <div class="lb_flex-item-help hint">
             {{'ServiceConfig.HintRtscts' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
+            <label class="control-label" for="testport">{{'ServiceConfig.LabelTestPort' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <button type="button" id="testport" data-mini="true">{{'ServiceConfig.ButtonTestPort' | trans}}</button>
+            <span id="testportresult"
+                data-reachable="{{'ServiceConfig.TestReachable' | trans}}"
+                data-unreachable="{{'ServiceConfig.TestUnreachable' | trans}}"
+                data-unresolved="{{'ServiceConfig.TestUnresolved' | trans}}"
+                data-present="{{'ServiceConfig.TestPresent' | trans}}"
+                data-noaccess="{{'ServiceConfig.TestNoAccess' | trans}}"
+                data-missing="{{'ServiceConfig.TestMissing' | trans}}"
+                data-empty="{{'ServiceConfig.TestEmpty' | trans}}"
+                data-invalid="{{'ServiceConfig.TestInvalid' | trans}}"></span>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintTestPort' | trans}}
         </div>
         <div class="lb_flex-item-spacer"></div>
     </div>
