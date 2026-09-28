@@ -1,0 +1,70 @@
+<style>
+    #devicemap {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ddd;
+        display: none;
+    }
+
+    .z2m-maplegend span {
+        margin-right: 1.5em;
+        white-space: nowrap;
+    }
+
+    .z2m-maplegend i {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    .z2m-maplinks {
+        border-collapse: collapse;
+        margin-top: 1em;
+    }
+
+    .z2m-maplinks td,
+    .z2m-maplinks th {
+        padding: 4px 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+</style>
+
+<div class="wide">Zigbee2Mqtt</div>
+<p><i>{{ 'Map.Desc' | trans }}</i></p>
+
+<div style="display:flex;align-items:center;gap:1em;flex-wrap:wrap">
+    <button type="button" id="mapscan" data-inline="true" data-mini="true">{{ 'Map.Scan' | trans }}</button>
+    <span id="mapstatus"
+        data-scanning="{{ 'Map.Scanning' | trans }}"
+        data-done="{{ 'Map.Done' | trans }}"
+        data-devices="{{ 'Map.Devices' | trans }}"
+        data-links="{{ 'Map.Links' | trans }}"
+        data-nobroker="{{ 'Map.NoBroker' | trans }}"
+        data-noanswer="{{ 'Map.NoAnswer' | trans }}"
+        data-refused="{{ 'Map.Refused' | trans }}"></span>
+</div>
+<p class="hint">{{ 'Map.Hint' | trans }}</p>
+
+<p class="z2m-maplegend hint">
+    <span><i style="background:#1565c0"></i>{{ 'Map.Coordinator' | trans }}</span>
+    <span><i style="background:#6dac20"></i>{{ 'Map.Router' | trans }}</span>
+    <span><i style="background:#90a4ae"></i>{{ 'Map.EndDevice' | trans }}</span>
+    <span>{{ 'Map.LqiLegend' | trans }}</span>
+</p>
+
+<div id="devicemap"></div>
+
+<table class="z2m-maplinks" id="maplinks" style="display:none">
+    <thead>
+        <tr>
+            <th>{{ 'Map.From' | trans }}</th>
+            <th>{{ 'Map.To' | trans }}</th>
+            <th>LQI</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>

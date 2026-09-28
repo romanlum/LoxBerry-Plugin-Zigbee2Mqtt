@@ -47,6 +47,11 @@ class Plugin
             $navbar[3]['CSS'] = 'ui.css';
             $navbar[3]['active'] = null;
         }
+
+        $navbar[5]['Name'] = $L["Navbar.Map"];
+        $navbar[5]['URL'] = 'map.php';
+        $navbar[5]['active'] = null;
+        $navbar[5]['Script'] = array('vendor/vis-network.min.js', 'map.js');
        
 
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
