@@ -49,6 +49,10 @@ class Plugin
         }
        
 
+        $navbar[6]['Name'] = $L["Navbar.Loxone"];
+        $navbar[6]['URL'] = 'loxone.php';
+        $navbar[6]['active'] = null;
+
         $navbar[99]['Name'] = $L["Navbar.Logfiles"];
         $navbar[99]['URL'] = 'log.php';
         $navbar[99]['active'] = null;

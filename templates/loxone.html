@@ -1,0 +1,107 @@
+<style>
+    .z2m-step {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px 14px;
+        margin: 12px 0;
+    }
+
+    .z2m-step h3 {
+        margin: 4px 0 8px 0;
+    }
+
+    .z2m-inputs {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .z2m-inputs th,
+    .z2m-inputs td {
+        padding: 4px 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .z2m-mono {
+        font-family: monospace;
+    }
+
+    .z2m-warn {
+        color: #e0620d;
+    }
+</style>
+
+<div class="wide">Zigbee2Mqtt</div>
+<p><i>{{ 'Loxone.Desc' | trans }}</i></p>
+
+<div class="z2m-step">
+    <h3>{{ 'Loxone.Step1' | trans }}</h3>
+    {% if not gateway.used %}
+    <p>{{ 'Loxone.OwnBroker' | trans }}</p>
+    {% elseif gateway.version == 2 %}
+    <p>{{ 'Loxone.GatewayV2' | trans }}</p>
+    {% else %}
+    <p>{{ 'Loxone.GatewayV1' | trans }}</p>
+    {% if gateway.udp %}<p class="z2m-warn">{{ 'Loxone.GatewayUdp' | trans }}</p>{% endif %}
+    {% endif %}
+</div>
+
+{% if gateway.used and gateway.version != 2 %}
+<div class="z2m-step">
+    <h3>{{ 'Loxone.Step2' | trans }}</h3>
+    <p>{{ 'Loxone.Subscription' | trans }} <span class="z2m-mono">{{ topic }}/+</span></p>
+    {% if gateway.subscriptions %}
+    <p>{{ 'Loxone.SubscriptionNow' | trans }} <span class="z2m-mono">{{ gateway.subscriptions | join(', ') }}</span></p>
+    {% else %}
+    <p class="z2m-warn">{{ 'Loxone.SubscriptionMissing' | trans }}</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="z2m-step">
+    <h3>{{ 'Loxone.Step3' | trans }}</h3>
+    {% if error == 'nobroker' %}
+    <p class="z2m-warn">{{ 'Loxone.NoBroker' | trans }}</p>
+    {% elseif error == 'noanswer' %}
+    <p class="z2m-warn">{{ 'Loxone.NoAnswer' | trans }}</p>
+    {% elseif inputs is empty %}
+    <p>{{ 'Loxone.NoInputs' | trans }}</p>
+    {% else %}
+    <p>{{ 'Loxone.InputsDesc' | trans }}</p>
+    <div style="overflow-x:auto">
+        <table class="z2m-inputs">
+            <tr>
+                <th>{{ 'Loxone.InputName' | trans }}</th>
+                <th>{{ 'Loxone.Unit' | trans }}</th>
+                <th>{{ 'Loxone.Meaning' | trans }}</th>
+            </tr>
+            {% for input in inputs %}
+            <tr>
+                <td class="z2m-mono">{{ input.title }}</td>
+                <td>{{ input.unit }}</td>
+                <td>{{ input.device }}: {{ input.description ?: input.property }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if skipped > 0 %}<p class="hint">{{ 'Loxone.Skipped' | trans | format(skipped) }}</p>{% endif %}
+    {% if noState %}<p class="hint">{{ 'Loxone.NoState' | trans }} {{ noState | join(', ') }}</p>{% endif %}
+    <p class="hint">{{ 'Loxone.Rename' | trans }}</p>
+    {% endif %}
+</div>
+
+{% if inputs is not empty and gateway.used and gateway.version != 2 and not gateway.udp %}
+<div class="z2m-step">
+    <h3>{{ 'Loxone.Step4' | trans }}</h3>
+    <p>{{ 'Loxone.TemplateDesc' | trans }}</p>
+    <p><a href="loxone.php?download=1" class="ui-btn ui-btn-inline ui-mini ui-corner-all" data-ajax="false">{{ 'Loxone.TemplateButton' | trans }}</a></p>
+    <p class="hint">{{ 'Loxone.TemplateImport' | trans }}</p>
+    <p class="z2m-warn">{{ 'Loxone.TemplateTwice' | trans }}</p>
+</div>
+{% endif %}
+
+<div class="z2m-step">
+    <h3>{{ 'Loxone.StepCheck' | trans }}</h3>
+    <p>{{ 'Loxone.Check' | trans }}</p>
+</div>
