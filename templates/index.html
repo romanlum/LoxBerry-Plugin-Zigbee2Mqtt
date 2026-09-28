@@ -85,6 +85,30 @@
 
     <div class="lb_flex-container">
         <div class="lb_flex-item-label">
+            <label class="control-label" for="permitjoinopen">{{'ServiceConfig.LabelPairing' | trans}}</label>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item">
+            <!-- acts on the running service right away, nothing is saved -->
+            <button type="button" id="permitjoinopen" data-mini="true" data-inline="true">{{'ServiceConfig.ButtonPairingOpen' | trans}}</button>
+            <button type="button" id="permitjoinclose" data-mini="true" data-inline="true">{{'ServiceConfig.ButtonPairingClose' | trans}}</button>
+            <span id="permitjoinresult"
+                data-open="{{'ServiceConfig.PairingOpen' | trans}}"
+                data-closed="{{'ServiceConfig.PairingClosed' | trans}}"
+                data-noanswer="{{'ServiceConfig.PairingNoAnswer' | trans}}"
+                data-nobroker="{{'ServiceConfig.PairingNoBroker' | trans}}"
+                data-refused="{{'ServiceConfig.PairingRefused' | trans}}"
+                data-invalid="{{'ServiceConfig.PairingInvalid' | trans}}"></span>
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+        <div class="lb_flex-item-help hint">
+            {{'ServiceConfig.HintPairing' | trans}}
+        </div>
+        <div class="lb_flex-item-spacer"></div>
+    </div>
+
+    <div class="lb_flex-container">
+        <div class="lb_flex-item-label">
             <label class="control-label" for="ServiceConfig[enableUI]">{{ 'ServiceConfig.LabelEnableUI' | trans
                 }}</label>
         </div>

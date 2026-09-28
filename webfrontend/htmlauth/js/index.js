@@ -143,6 +143,45 @@ function viewhide() {
 
 }
 
+let permitJoinTimer = null;
+
+/**
+ * Opens (254 s) or closes (0) pairing on the running zigbee2mqtt and shows
+ * the answer. While open, the remaining time counts down locally.
+ * @param {number} time seconds, 0 closes
+ */
+function permitJoin(time) {
+    const result = $("#permitjoinresult");
+    result.css("color", "grey").text("...");
+    const jqxhr = $.post(`ajax.php/?action=permitJoin`, { time: time }, null, "json");
+    jqxhr.done(function (data) {
+        clearInterval(permitJoinTimer);
+        let text = result.data(data.message) || data.message;
+        if (data.error) {
+            text += " " + data.error;
+        }
+        if (data.result && data.time > 0) {
+            const end = Date.now() + data.time * 1000;
+            const tick = function () {
+                const left = Math.round((end - Date.now()) / 1000);
+                if (left <= 0) {
+                    clearInterval(permitJoinTimer);
+                    result.css("color", "grey").text(result.data("closed"));
+                    return;
+                }
+                result.css("color", "green").text(text + " " + left + " s");
+            };
+            tick();
+            permitJoinTimer = setInterval(tick, 1000);
+        } else {
+            result.css("color", data.result ? "grey" : "red").text(text);
+        }
+    });
+    jqxhr.fail(function () {
+        result.css("color", "red").text("error");
+    });
+}
+
 /**
  * Document ready function
  */
@@ -153,6 +192,12 @@ $(document).ready(function () {
     });
     $("#MqttConfig\\[usemqttgateway\\]").click(function () {
         viewhide();
+    });
+    $("#permitjoinopen").click(function () {
+        permitJoin(254);
+    });
+    $("#permitjoinclose").click(function () {
+        permitJoin(0);
     });
 
     fetchFormData("ServiceConfig")

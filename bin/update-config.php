@@ -41,7 +41,15 @@ if (is_enabled($mqttcfg->usemqttgateway)) {
     $creds = mqtt_connectiondetails();
 
     if (is_enabled($mqttcfg->registerMqttTopic)) {
-        file_put_contents($mqttGatewaySubscriptionFile, $mqttcfg->topic . "/#");
+        // One level only: <topic>/# would also forward bridge/devices and
+        // bridge/definitions (several hundred kB of JSON), which stalls the
+        // MQTT gateway. Device values, their availability and the bridge
+        // state are what Loxone needs.
+        file_put_contents($mqttGatewaySubscriptionFile, implode("\n", [
+            $mqttcfg->topic . "/+",
+            $mqttcfg->topic . "/+/availability",
+            $mqttcfg->topic . "/bridge/state"
+        ]) . "\n");
     } else {
         file_put_contents($mqttGatewaySubscriptionFile, "");
     }
