@@ -134,15 +134,6 @@ function saveAndApply() {
 
 }
 
-function viewhide() {
-    if ($("#MqttConfig\\[usemqttgateway\\]").is(":checked")) {
-        $(".ownbroker").fadeOut();
-    } else {
-        $(".ownbroker").fadeIn();
-    }
-
-}
-
 let permitJoinTimer = null;
 
 /**
@@ -182,22 +173,31 @@ function permitJoin(time) {
     });
 }
 
+function viewhide() {
+    if ($("#MqttConfig\\[usemqttgateway\\]").is(":checked")) {
+        $(".ownbroker").fadeOut();
+    } else {
+        $(".ownbroker").fadeIn();
+    }
+
+}
+
 /**
  * Document ready function
  */
 $(document).ready(function () {
 
-    $("#saveapply").click(function () {
-        saveAndApply();
-    });
-    $("#MqttConfig\\[usemqttgateway\\]").click(function () {
-        viewhide();
-    });
     $("#permitjoinopen").click(function () {
         permitJoin(254);
     });
     $("#permitjoinclose").click(function () {
         permitJoin(0);
+    });
+    $("#saveapply").click(function () {
+        saveAndApply();
+    });
+    $("#MqttConfig\\[usemqttgateway\\]").click(function () {
+        viewhide();
     });
 
     fetchFormData("ServiceConfig")

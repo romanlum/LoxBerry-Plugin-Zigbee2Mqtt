@@ -21,12 +21,12 @@ if (isset($_GET["action"])) {
         }
     } else if ($action == "setDevices") {
         sendresponse(200, "application/json", setDevices($_POST));
+    } else if ($action == "permitJoin") {
+        sendresponse(200, "application/json", permitJoin(isset($_POST["time"]) ? $_POST["time"] : ""));
     } else if ($action == "applyChanges") {
         sendresponse(200, "application/json", applyChanges());
     } else if ($action == "getPid") {
         sendresponse(200, "application/json", getPid());
-    } else if ($action == "permitJoin") {
-        sendresponse(200, "application/json", permitJoin(isset($_POST["time"]) ? $_POST["time"] : ""));
     }
 }
 
@@ -44,6 +44,80 @@ function applyChanges()
 
 
     return '{"result":true}';
+}
+
+/**
+ * Opens or closes pairing at runtime.
+ * zigbee2mqtt 2.x ignores permit_join in configuration.yaml, pairing is only
+ * possible through the MQTT request <topic>/bridge/request/permit_join with
+ * {"time": 1..254} (seconds) or {"time": 0} to close it again. The request is
+ * sent with the same broker credentials that update-config.php writes into
+ * configuration.yaml, and the answer of zigbee2mqtt is passed back.
+ */
+function permitJoin($time)
+{
+    $time = trim((string) $time);
+    if (!preg_match('/^[0-9]{1,3}$/', $time) || (int) $time > 254) {
+        return json_encode(["result" => false, "message" => "invalid"]);
+    }
+    $time = (int) $time;
+
+    require_once "loxberry_io.php";
+    require_once "phpMQTT/phpMQTT.php";
+    $mqttcfg = MqttConfig::load();
+    if (is_enabled($mqttcfg->usemqttgateway)) {
+        $creds = mqtt_connectiondetails();
+    } else {
+        $creds = [
+            "brokerhost" => $mqttcfg->server,
+            "brokerport" => $mqttcfg->port,
+            "brokeruser" => $mqttcfg->username,
+            "brokerpass" => $mqttcfg->password
+        ];
+    }
+    if (empty($creds["brokerhost"]) || $mqttcfg->topic === "") {
+        return json_encode(["result" => false, "message" => "nobroker"]);
+    }
+
+    $mqtt = new Bluerhinos\phpMQTT($creds["brokerhost"], (int) $creds["brokerport"], "zigbee2mqtt-plugin-" . bin2hex(random_bytes(4)));
+    if (!@$mqtt->connect(true, null, $creds["brokeruser"], $creds["brokerpass"])) {
+        return json_encode(["result" => false, "message" => "nobroker"]);
+    }
+
+    // the transaction id lets zigbee2mqtt tag its answer, so an answer to
+    // someone else's request is not taken for ours
+    $transaction = bin2hex(random_bytes(6));
+    $answer = null;
+    $mqtt->subscribe([
+        $mqttcfg->topic . "/bridge/response/permit_join" => [
+            "qos" => 0,
+            "function" => function ($topic, $msg) use (&$answer, $transaction) {
+                $data = json_decode($msg, true);
+                if (is_array($data) && isset($data["transaction"]) && $data["transaction"] === $transaction) {
+                    $answer = $data;
+                }
+            }
+        ]
+    ], 0);
+    $mqtt->publish($mqttcfg->topic . "/bridge/request/permit_join", json_encode(["time" => $time, "transaction" => $transaction]), 0, false);
+
+    $until = microtime(true) + 5;
+    while ($answer === null && microtime(true) < $until) {
+        $mqtt->proc();
+    }
+    $mqtt->close();
+
+    if ($answer === null) {
+        LOGWARN("permit_join: no answer from zigbee2mqtt within 5 s");
+        return json_encode(["result" => false, "message" => "noanswer"]);
+    }
+    if (!isset($answer["status"]) || $answer["status"] !== "ok") {
+        $error = isset($answer["error"]) ? (string) $answer["error"] : "";
+        LOGWARN("permit_join refused by zigbee2mqtt: " . $error);
+        return json_encode(["result" => false, "message" => "refused", "error" => $error]);
+    }
+    LOGINF("permit_join set to $time s");
+    return json_encode(["result" => true, "message" => $time > 0 ? "open" : "closed", "time" => $time]);
 }
 
 /**
@@ -129,80 +203,6 @@ function getPid()
     //fetches the pid or 0 if not running
     $pid = shell_exec("systemctl show --property MainPID --value zigbee2mqtt");
     return "{\"pid\":$pid }";
-}
-
-/**
- * Opens or closes pairing at runtime.
- * zigbee2mqtt 2.x ignores permit_join in configuration.yaml, pairing is only
- * possible through the MQTT request <topic>/bridge/request/permit_join with
- * {"time": 1..254} (seconds) or {"time": 0} to close it again. The request is
- * sent with the same broker credentials that update-config.php writes into
- * configuration.yaml, and the answer of zigbee2mqtt is passed back.
- */
-function permitJoin($time)
-{
-    $time = trim((string) $time);
-    if (!preg_match('/^[0-9]{1,3}$/', $time) || (int) $time > 254) {
-        return json_encode(["result" => false, "message" => "invalid"]);
-    }
-    $time = (int) $time;
-
-    require_once "loxberry_io.php";
-    require_once "phpMQTT/phpMQTT.php";
-    $mqttcfg = MqttConfig::load();
-    if (is_enabled($mqttcfg->usemqttgateway)) {
-        $creds = mqtt_connectiondetails();
-    } else {
-        $creds = [
-            "brokerhost" => $mqttcfg->server,
-            "brokerport" => $mqttcfg->port,
-            "brokeruser" => $mqttcfg->username,
-            "brokerpass" => $mqttcfg->password
-        ];
-    }
-    if (empty($creds["brokerhost"]) || $mqttcfg->topic === "") {
-        return json_encode(["result" => false, "message" => "nobroker"]);
-    }
-
-    $mqtt = new Bluerhinos\phpMQTT($creds["brokerhost"], (int) $creds["brokerport"], "zigbee2mqtt-plugin-" . bin2hex(random_bytes(4)));
-    if (!@$mqtt->connect(true, null, $creds["brokeruser"], $creds["brokerpass"])) {
-        return json_encode(["result" => false, "message" => "nobroker"]);
-    }
-
-    // the transaction id lets zigbee2mqtt tag its answer, so an answer to
-    // someone else's request is not taken for ours
-    $transaction = bin2hex(random_bytes(6));
-    $answer = null;
-    $mqtt->subscribe([
-        $mqttcfg->topic . "/bridge/response/permit_join" => [
-            "qos" => 0,
-            "function" => function ($topic, $msg) use (&$answer, $transaction) {
-                $data = json_decode($msg, true);
-                if (is_array($data) && isset($data["transaction"]) && $data["transaction"] === $transaction) {
-                    $answer = $data;
-                }
-            }
-        ]
-    ], 0);
-    $mqtt->publish($mqttcfg->topic . "/bridge/request/permit_join", json_encode(["time" => $time, "transaction" => $transaction]), 0, false);
-
-    $until = microtime(true) + 5;
-    while ($answer === null && microtime(true) < $until) {
-        $mqtt->proc();
-    }
-    $mqtt->close();
-
-    if ($answer === null) {
-        LOGWARN("permit_join: no answer from zigbee2mqtt within 5 s");
-        return json_encode(["result" => false, "message" => "noanswer"]);
-    }
-    if (!isset($answer["status"]) || $answer["status"] !== "ok") {
-        $error = isset($answer["error"]) ? (string) $answer["error"] : "";
-        LOGWARN("permit_join refused by zigbee2mqtt: " . $error);
-        return json_encode(["result" => false, "message" => "refused", "error" => $error]);
-    }
-    LOGINF("permit_join set to $time s");
-    return json_encode(["result" => true, "message" => $time > 0 ? "open" : "closed", "time" => $time]);
 }
 
 function sendresponse($httpstatus, $contenttype, $response = null)
