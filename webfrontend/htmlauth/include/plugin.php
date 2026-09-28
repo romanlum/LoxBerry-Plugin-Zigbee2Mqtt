@@ -57,10 +57,10 @@ class Plugin
         $navbar[$activePage]['active'] = true;
         $script = null;
         $css = null;
-        if (in_array('Script', $navbar[$activePage])) {
+        if (isset($navbar[$activePage]['Script'])) {
             $script = $navbar[$activePage]['Script'];
         }
-        if (in_array('CSS', $navbar[$activePage])) {
+        if (isset($navbar[$activePage]['CSS'])) {
             $css = $navbar[$activePage]['CSS'];
         }
         // this script is included in the loxberry header
@@ -70,7 +70,7 @@ class Plugin
                     $htmlhead .= '<script src="js/' . $value . '"></script>';
                 }
             } else {
-                $htmlhead = '<script src="js/' . $script . '"></script>';
+                $htmlhead .= '<script src="js/' . $script . '"></script>';
             }
         }
 
@@ -81,7 +81,7 @@ class Plugin
                     $htmlhead .= '<link rel="stylesheet" href="css/' . $value . '"></link>';
                 }
             } else {
-                $htmlhead = '<link rel="stylesheet" href="css/' . $css . '"></link>';
+                $htmlhead .= '<link rel="stylesheet" href="css/' . $css . '"></link>';
             }
         }
 
