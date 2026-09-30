@@ -11,6 +11,9 @@ $log = LBLog::newLog(["name" => "Service"]);
 
 if (isset($_GET["action"])) {
     $action = $_GET["action"];
+    if (!requestFromPluginPage($action)) {
+        sendresponse(403, "application/json", '{"result":false,"error":"request not accepted"}');
+    }
     if ($action == "getFormData") {
         if (isset($_GET["form"])) {
             sendresponse(200, "application/json", getFormData($_GET["form"]));
@@ -26,6 +29,29 @@ if (isset($_GET["action"])) {
     } else if ($action == "getPid") {
         sendresponse(200, "application/json", getPid());
     }
+}
+
+/**
+ * The plugin pages call this endpoint with jQuery, which marks its
+ * same-origin requests with "X-Requested-With: XMLHttpRequest". A link, a
+ * form or an image on another web site cannot set this header, and a script
+ * on another site would need a CORS preflight that this endpoint does not
+ * answer. Because the browser sends the LoxBerry login along with such
+ * requests, actions that change something or return the MQTT credentials
+ * are only accepted with the header, and changing actions only as POST.
+ */
+function requestFromPluginPage($action)
+{
+    // permitJoin and testPort are the actions of the pairing buttons and the
+    // port test; listed here so they are covered as soon as they exist
+    $changing = array("setFormData", "setDevices", "applyChanges", "permitJoin", "testPort");
+    $protected = array_merge($changing, array("getFormData"));
+    if (!in_array($action, $protected, true)) {
+        return true;
+    }
+    $xhr = isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] === "XMLHttpRequest";
+    $post = isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST";
+    return $xhr && ($post || !in_array($action, $changing, true));
 }
 
 /**
@@ -137,6 +163,7 @@ function sendresponse($httpstatus, $contenttype, $response = null)
         204 => "NO CONTENT",
         304 => "NOT MODIFIED",
         400 => "BAD REQUEST",
+        403 => "FORBIDDEN",
         404 => "NOT FOUND",
         405 => "METHOD NOT ALLOWED",
         500 => "INTERNAL SERVER ERROR",
