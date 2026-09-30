@@ -40,6 +40,10 @@ class Plugin
         $navbar[2]['active'] = null;
         $navbar[2]['Script'] = array('vendor/ace.js', 'devices.js');
 
+        $navbar[4]['Name'] = $L["Navbar.Status"];
+        $navbar[4]['URL'] = 'status.php';
+        $navbar[4]['active'] = null;
+
         if(is_enabled($serviceCfg->enableUI))
         {
             $navbar[3]['Name'] = $L["Navbar.UI"];

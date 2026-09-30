@@ -1,0 +1,50 @@
+<style>
+    .z2m-status {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .z2m-status td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+    }
+
+    .z2m-status td.z2m-mark {
+        width: 1.5em;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .z2m-ok { color: #6dac20; }
+    .z2m-fail { color: #c62828; }
+    .z2m-hint { color: #e0620d; }
+    .z2m-info { color: #546e7a; }
+</style>
+
+<div class="wide">Zigbee2Mqtt</div>
+<p><i>{{ 'Status.Desc' | trans }}</i></p>
+
+<p class="hint">
+    <span class="z2m-ok">&#10004;</span> {{ 'Status.LegendOk' | trans }} &nbsp;
+    <span class="z2m-fail">&#10008;</span> {{ 'Status.LegendFail' | trans }} &nbsp;
+    <span class="z2m-hint">!</span> {{ 'Status.LegendHint' | trans }} &nbsp;
+    <span class="z2m-info">i</span> {{ 'Status.LegendInfo' | trans }}
+</p>
+
+<table class="z2m-status">
+    {% for row in rows %}
+    <tr>
+        <td class="z2m-mark z2m-{{ row.state }}">
+            {% if row.state == 'ok' %}&#10004;{% elseif row.state == 'fail' %}&#10008;{% elseif row.state == 'hint' %}!{% else %}i{% endif %}
+        </td>
+        <td>{{ row.label | trans }}</td>
+        <td>{{ row.detail }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div style="display:flex;align-items:center;justify-content:center;gap:1em;margin-top:1em">
+    <span class="hint">{{ 'Status.Updated' | trans }} {{ time }}</span>
+    <a href="status.php" class="ui-btn ui-btn-inline ui-mini ui-corner-all">{{ 'Status.Refresh' | trans }}</a>
+</div>
