@@ -57,7 +57,68 @@
     .saveerror {
         color: red;
     }
+
+    .z2m-devicelist {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .z2m-devicelist th,
+    .z2m-devicelist td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .z2m-small {
+        font-size: 85%;
+        color: #666;
+    }
+
+    .z2m-warn {
+        font-size: 85%;
+        color: #e0620d;
+    }
 </style>
+
+<!-- Device list (read only) -->
+<div class="wide">{{ 'DeviceList.Title' | trans }}</div>
+<p><i>{{ 'DeviceList.Desc' | trans }}</i></p>
+{% if deviceListError == 'nobroker' %}
+<p style="color:#c62828">{{ 'DeviceList.NoBroker' | trans }}</p>
+{% elseif deviceListError == 'noanswer' %}
+<p style="color:#c62828">{{ 'DeviceList.NoAnswer' | trans }}</p>
+{% elseif deviceList is empty %}
+<p>{{ 'DeviceList.Empty' | trans }}</p>
+{% else %}
+<div style="overflow-x:auto">
+    <table class="z2m-devicelist">
+        <tr>
+            <th>{{ 'DeviceList.Name' | trans }}</th>
+            <th>{{ 'DeviceList.Model' | trans }}</th>
+            <th>{{ 'DeviceList.Type' | trans }}</th>
+            <th>{{ 'DeviceList.Values' | trans }}</th>
+            {% if showLastSeen %}<th>{{ 'DeviceList.LastSeen' | trans }}</th>{% endif %}
+        </tr>
+        {% for device in deviceList %}
+        <tr>
+            <td><b>{{ device.name }}</b><br><span class="z2m-small">{{ device.ieee }}</span></td>
+            <td>{{ device.model }}<br><span class="z2m-small">{{ device.description }}</span></td>
+            <td>{{ device.type }}<br><span class="z2m-small">{{ device.power }}</span>
+                {% if device.interview != 'SUCCESSFUL' %}<br><span class="z2m-warn">{{ 'DeviceList.InterviewIncomplete' | trans }} ({{ device.interview }})</span>{% endif %}
+                {% if not device.supported %}<br><span class="z2m-warn">{{ 'DeviceList.Unsupported' | trans }}</span>{% endif %}
+                {% if device.disabled %}<br><span class="z2m-small">{{ 'DeviceList.Disabled' | trans }}</span>{% endif %}
+            </td>
+            <td>{{ device.values }}</td>
+            {% if showLastSeen %}<td>{{ device.lastSeen }}</td>{% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<p class="hint">{{ 'DeviceList.ValuesFrom' | trans }}{% if stateTime %} ({{ stateTime }}){% endif %}</p>
+{% endif %}
+<hr>
 
 <!-- Form devices -->
 <form id="form" onsubmit="return false;">
