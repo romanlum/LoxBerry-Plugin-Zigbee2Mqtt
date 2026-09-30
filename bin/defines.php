@@ -8,4 +8,4 @@ $mqttGatewaySubscriptionFile = LBPCONFIGDIR . "/mqtt_subscriptions.cfg";
 
 $L = LBSystem::readlanguage("language.ini");
 $navbar = array();
-$htmlhead = 'htmlhead';
+$htmlhead = '';
