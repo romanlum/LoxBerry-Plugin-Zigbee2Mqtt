@@ -168,45 +168,108 @@ case $ARCH in
         ;;
 esac
 
+# npm-style semver range matching for package.json engines.node (e.g.
+# "^22.2.0 || ^24 || <=26.2"), shared by the php -r snippets below. Supports
+# ||, space-separated comparators (<, <=, >, >=, =, ^, ~), partial versions,
+# x/* wildcards and hyphen ranges. ^0.x semantics are not special-cased -
+# irrelevant for Node.js.
+NODE_SEMVER_PHP='
+function semver_comparators($part) {
+    $part = preg_replace("/(<=|>=|<|>|=|\\^|~)\\s+/", "\\1", trim($part));
+    if (preg_match("/^(\\S+)\\s+-\\s+(\\S+)$/", $part, $h)) $part = ">=" . $h[1] . " <=" . $h[2];
+    return preg_split("/\\s+/", $part, -1, PREG_SPLIT_NO_EMPTY);
+}
+// Expands one comparator into [op, "x.y.z"] bounds for version_compare, or false if unparseable.
+function semver_bounds($c) {
+    if ($c === "*" || $c === "x" || $c === "X") return [];
+    if (!preg_match("/^(<=|>=|<|>|=|\\^|~)?v?(\\d+)(?:\\.(\\d+|[xX*]))?(?:\\.(\\d+|[xX*]))?(?:-[0-9A-Za-z.-]+)?$/", $c, $m)) return false;
+    $op = $m[1];
+    $maj = (int)$m[2];
+    $min = (isset($m[3]) && ctype_digit($m[3])) ? (int)$m[3] : null;
+    $pat = ($min !== null && isset($m[4]) && ctype_digit($m[4])) ? (int)$m[4] : null;
+    $lo = $maj . "." . ($min === null ? 0 : $min) . "." . ($pat === null ? 0 : $pat);
+    $nextMajor = ($maj + 1) . ".0.0";
+    // First version past a partial version ("26.2" -> "26.3.0"), null if fully specified
+    $next = $min === null ? $nextMajor : ($pat === null ? $maj . "." . ($min + 1) . ".0" : null);
+    switch ($op) {
+        case "^":  return [[">=", $lo], ["<", $nextMajor]];
+        case "~":  return [[">=", $lo], ["<", $min === null ? $nextMajor : $maj . "." . ($min + 1) . ".0"]];
+        case ">=": return [[">=", $lo]];
+        case ">":  return $next === null ? [[">", $lo]] : [[">=", $next]];
+        case "<":  return [["<", $lo]];
+        case "<=": return $next === null ? [["<=", $lo]] : [["<", $next]];
+        default:   return $next === null ? [["=", $lo]] : [[">=", $lo], ["<", $next]];
+    }
+}
+function semver_range_valid($range) {
+    foreach (explode("||", $range) as $part) {
+        foreach (semver_comparators($part) as $c) if (semver_bounds($c) === false) return false;
+    }
+    return true;
+}
+function semver_satisfies($v, $range) {
+    $v = ltrim($v, "v");
+    foreach (explode("||", $range) as $part) {
+        $ok = true;
+        foreach (semver_comparators($part) as $c) {
+            $bounds = semver_bounds($c);
+            if ($bounds === false) { $ok = false; break; }
+            foreach ($bounds as $b) if (!version_compare($v, $b[1], $b[0])) { $ok = false; break 2; }
+        }
+        if ($ok) return true;
+    }
+    return false;
+}
+'
+
+# node_satisfies <version> <range>
+node_satisfies() {
+    php -r "$NODE_SEMVER_PHP"' exit(semver_satisfies($argv[1], $argv[2]) ? 0 : 1);' "$1" "$2" 2>/dev/null
+}
+
 # Resolves the Node.js version to install: reuses the currently vendored
 # Node if it already satisfies zigbee2mqtt's package.json engines.node,
-# otherwise downloads the newest (preferably LTS) nodejs.org release that
-# does. Falls back to the plugin-pinned baseline if engines.node cannot be
-# read.
+# otherwise downloads the newest (preferably LTS) stable nodejs.org release
+# that satisfies it and ships a build for this architecture. Falls back to
+# the plugin-pinned baseline if engines.node cannot be read or resolved.
 resolve_node_version() {
-    local required required_major
+    local required
 
-    required=$(grep -A5 '"engines"' package.json 2>/dev/null | grep '"node"' | head -1 | sed -E 's/.*"node"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
-    if [ -n "$required" ]; then
-        required_major=$(echo "$required" | grep -oE '[0-9]+' | head -1)
-    fi
+    required=$(php -r '$p = json_decode((string)@file_get_contents("package.json"), true); if (is_array($p) && isset($p["engines"]["node"]) && is_string($p["engines"]["node"])) echo trim($p["engines"]["node"]);' 2>/dev/null)
 
-    if [ -z "${required_major:-}" ]; then
+    if [ -z "$required" ]; then
         echo "<WARNING> Could not read required Node.js version from package.json, falling back to plugin default" >&2
         fallback_node_version
         return
     fi
 
+    if ! php -r "$NODE_SEMVER_PHP"' exit(semver_range_valid($argv[1]) ? 0 : 1);' "$required" 2>/dev/null; then
+        echo "<WARNING> Could not parse engines.node range \"$required\" from package.json, falling back to plugin default" >&2
+        fallback_node_version
+        return
+    fi
+
     if [ -x "$CUR/node/bin/node" ]; then
-        local cur_major
-        cur_major=$("$CUR/node/bin/node" -e 'console.log(process.versions.node.split(".")[0])' 2>/dev/null)
-        if [ -n "$cur_major" ] && [ "$cur_major" -ge "$required_major" ] 2>/dev/null; then
-            "$CUR/node/bin/node" -e 'console.log("v"+process.versions.node)'
+        local cur_version
+        cur_version=$("$CUR/node/bin/node" -e 'console.log("v"+process.versions.node)' 2>/dev/null)
+        if [ -n "$cur_version" ] && node_satisfies "$cur_version" "$required"; then
+            echo "$cur_version"
             return
         fi
     fi
 
     echo "<INFO> Resolving newest Node.js release satisfying engines.node ($required) from nodejs.org" >&2
     local resolved
-    resolved=$(curl -s https://nodejs.org/dist/index.json | php -r '
+    resolved=$(curl -s https://nodejs.org/dist/index.json | php -r "$NODE_SEMVER_PHP"'
         $data = json_decode(stream_get_contents(STDIN), true);
         if (!is_array($data)) { exit; }
-        $reqMajor = (int)$argv[1];
         $bestLts = null; $bestAny = null;
         foreach ($data as $rel) {
-            $v = ltrim($rel["version"], "v");
-            $major = (int)explode(".", $v)[0];
-            if ($major < $reqMajor) continue;
+            $v = ltrim(isset($rel["version"]) ? $rel["version"] : "", "v");
+            // Stable releases only - index.json also lists prereleases
+            if (!preg_match("/^\\d+\\.\\d+\\.\\d+$/", $v)) continue;
+            if (!isset($rel["files"]) || !in_array($argv[2], $rel["files"], true)) continue;
+            if (!semver_satisfies($v, $argv[1])) continue;
             if ($bestAny === null || version_compare($v, $bestAny, ">")) $bestAny = $v;
             if (!empty($rel["lts"])) {
                 if ($bestLts === null || version_compare($v, $bestLts, ">")) $bestLts = $v;
@@ -214,7 +277,7 @@ resolve_node_version() {
         }
         $best = $bestLts !== null ? $bestLts : $bestAny;
         if ($best !== null) echo "v$best\n";
-    ' "$required_major" 2>/dev/null)
+    ' "$required" "linux-$NODE_ARCH" 2>/dev/null)
 
     if [ -z "$resolved" ]; then
         echo "<WARNING> Could not resolve a Node.js version from nodejs.org, falling back to plugin default" >&2
