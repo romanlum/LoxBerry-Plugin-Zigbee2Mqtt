@@ -7,7 +7,8 @@
         color: green;
     }
 
-    .saveerror {
+    .saveerror,
+    #backuperror {
         color: red;
     }
 
@@ -29,6 +30,16 @@
         font-size: 85%;
         white-space: pre-wrap;
         border-radius: 4px;
+    }
+
+    #backups {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #backups td {
+        padding: 4px 8px;
+        border-bottom: 1px solid #ddd;
     }
 </style>
 
@@ -84,3 +95,11 @@
 </div>
 
 <pre id="upgradelog"></pre>
+
+<div class="wide">{{ 'Version.BackupsTitle' | trans }}</div>
+<p><i>{{ 'Version.BackupsDesc' | trans }}</i></p>
+<p id="nobackups" style="display: none;">{{ 'Version.BackupsNone' | trans }}</p>
+<p id="backuperror" style="display: none;">{{ 'Version.BackupDownloadError' | trans }}</p>
+<table id="backups" data-download="{{ 'Version.BackupDownload' | trans }}">
+    <tbody></tbody>
+</table>

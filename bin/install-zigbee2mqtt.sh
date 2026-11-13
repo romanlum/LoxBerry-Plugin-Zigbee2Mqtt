@@ -71,6 +71,12 @@ OLD=/opt/zigbee2mqtt.old
 STATEFILE=$PCONFIG/upgrade-state.json
 VERSIONFILE=$PCONFIG/installed-version.json
 
+# Backups taken before each version change, offered for download on the
+# Version tab (see create_backup). Kept in the config folder, not the
+# zigbee2mqtt data folder: zigbee2mqtt's own backup zips its data folder.
+BACKUPDIR=$PCONFIG/backups
+BACKUP_KEEP=5
+
 # /var/lock isn't reliably writable by loxberry, so the lock file lives in
 # the plugin's own (loxberry-owned) config folder instead.
 LOCKFILE=$PCONFIG/install.lock
@@ -354,9 +360,6 @@ echo "<INFO> Linking log and data folders"
 ln -f -s "$PLOG" "$NEW/log"
 ln -f -s "$PDATA" "$NEW/data"
 
-# The systemd unit is only linked once the plugin's own install has
-# completed (postroot.sh does that after this script returns), so during a
-# fresh plugin install there is nothing to stop/start here yet.
 START_STABLE_SECONDS=60
 
 # zigbee2mqtt only exits on startup errors (e.g. adapter not reachable)
@@ -381,6 +384,79 @@ wait_for_stable_start() {
     return 0
 }
 
+# Archives the zigbee2mqtt data folder and the plugin settings into
+# $BACKUPDIR, so the user can download it from the Version tab and recover
+# if the new version breaks something that switching back can't undo (e.g. a
+# database or configuration migration). Called while zigbee2mqtt is stopped:
+# it writes its database and coordinator backup on shutdown, so the snapshot
+# is complete and consistent. Keeps the newest $BACKUP_KEEP archives.
+create_backup() {
+    local from node name staging
+    from=$(php -r '$p = json_decode((string)@file_get_contents($argv[1]), true); echo is_array($p) && isset($p["version"]) ? $p["version"] : "none";' "$CUR/package.json" 2>/dev/null)
+    from=$(echo "${from:-none}" | tr -c '0-9A-Za-z.\n-' '_')
+    node=$("$CUR/node/bin/node" -v 2>/dev/null)
+    name="zigbee2mqtt-$(date -u +%Y%m%d-%H%M%S)-$from.tar.gz"
+
+    staging=$(mktemp -d) || return 1
+    mkdir -p "$staging/data" "$staging/config" "$BACKUPDIR" || { rm -rf "$staging"; return 1; }
+    # releases-cache.json is the plugin's own GitHub cache, not z2m data
+    if ! cp -a "$PDATA/." "$staging/data/" \
+        || ! rm -f "$staging/data/releases-cache.json" \
+        || ! find "$PCONFIG" -maxdepth 1 -type f ! -name install.lock ! -name 'upgrade-state.json*' \
+            -exec cp -a {} "$staging/config/" \; ; then
+        rm -rf "$staging"
+        return 1
+    fi
+
+    cat > "$staging/backup-info.json" <<EOF
+{
+    "created": "$(now)",
+    "zigbee2mqttVersion": "$from",
+    "nodeVersion": "$node",
+    "upgradingTo": "$VERSION"
+}
+EOF
+    cat > "$staging/README.txt" <<EOF
+zigbee2mqtt backup, created $(now) before switching from zigbee2mqtt $from
+to $VERSION.
+
+data/    zigbee2mqtt data folder (devices, groups, network, configuration)
+config/  LoxBerry plugin settings
+
+It contains the Zigbee network key and the MQTT password - keep it safe.
+
+To restore (as root on the LoxBerry):
+ 1. If needed, switch back to zigbee2mqtt $from on the plugin's Version tab.
+ 2. systemctl stop zigbee2mqtt
+ 3. Copy the contents of data/ to $PDATA/
+    (and, to also restore the plugin settings, config/ to $PCONFIG/)
+ 4. chown -R loxberry:loxberry $PDATA $PCONFIG
+ 5. systemctl start zigbee2mqtt
+EOF
+
+    # Written under a temporary name and renamed, so the Version tab never
+    # lists a half-written archive. Only readable by loxberry: it contains
+    # the network key and MQTT password.
+    if ! (umask 077 && tar -czf "$BACKUPDIR/.$name.part" -C "$staging" .) \
+        || ! mv -f "$BACKUPDIR/.$name.part" "$BACKUPDIR/$name"; then
+        rm -f "$BACKUPDIR/.$name.part"
+        rm -rf "$staging"
+        return 1
+    fi
+    rm -rf "$staging"
+    echo "<INFO> Backup created: $name"
+
+    # Names start with a UTC timestamp, so they sort chronologically
+    find "$BACKUPDIR" -maxdepth 1 -name 'zigbee2mqtt-*.tar.gz' | sort -r \
+        | tail -n +$((BACKUP_KEEP + 1)) | while read -r old; do
+            rm -f "$old"
+        done
+    return 0
+}
+
+# The systemd unit is only linked once the plugin's own install has
+# completed (postroot.sh does that after this script returns), so during a
+# fresh plugin install there is nothing to stop/start here yet.
 UNIT_EXISTS=0
 if [ -e /etc/systemd/system/zigbee2mqtt.service ]; then
     UNIT_EXISTS=1
@@ -389,6 +465,17 @@ fi
 if [ "$UNIT_EXISTS" -eq 1 ]; then
     echo "<INFO> Stopping zigbee2mqtt service"
     sudo /bin/systemctl stop zigbee2mqtt
+fi
+
+# A fresh install has no zigbee2mqtt data to back up yet
+if [ -f "$PDATA/configuration.yaml" ]; then
+    echo "<INFO> Backing up zigbee2mqtt data and plugin settings"
+    if ! create_backup; then
+        if [ "$UNIT_EXISTS" -eq 1 ]; then
+            sudo /bin/systemctl start zigbee2mqtt
+        fi
+        fail "Could not create a backup of the zigbee2mqtt data. The upgrade was aborted, the previous version is still running."
+    fi
 fi
 
 echo "<INFO> Swapping in new version"

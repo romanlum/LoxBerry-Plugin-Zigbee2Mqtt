@@ -8,6 +8,9 @@ define('Z2M_STATE_FILE', LBPCONFIGDIR . '/upgrade-state.json');
 define('Z2M_UPGRADE_LOG', LBPLOGDIR . '/upgrade.log');
 define('Z2M_RELEASES_CACHE', LBPDATADIR . '/releases-cache.json');
 define('Z2M_RELEASES_CACHE_TTL', 3600);
+// Written by install-zigbee2mqtt.sh (create_backup) before each version change
+define('Z2M_BACKUP_DIR', LBPCONFIGDIR . '/backups');
+define('Z2M_BACKUP_NAME_PATTERN', '/^zigbee2mqtt-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-([0-9A-Za-z._-]+)\.tar\.gz$/');
 
 // How long a "running" state may stay pid-less before it is considered dead.
 // z2mMarkUpgradeRunning() cannot know the pid yet; the installer stamps the
@@ -87,6 +90,47 @@ function z2mGetAvailableReleases($perPage = 15)
         }
     }
     return [];
+}
+
+/**
+ * Lists the backups taken before version changes, newest first, with the
+ * zigbee2mqtt version they were taken from.
+ */
+function z2mListBackups()
+{
+    $backups = [];
+    foreach (glob(Z2M_BACKUP_DIR . '/zigbee2mqtt-*.tar.gz') ?: [] as $path) {
+        $name = basename($path);
+        if (!preg_match(Z2M_BACKUP_NAME_PATTERN, $name, $m)) {
+            continue;
+        }
+        $backups[] = [
+            'file' => $name,
+            'created' => "$m[1]-$m[2]-$m[3]T$m[4]:$m[5]:$m[6]Z",
+            'version' => $m[7],
+            'size' => filesize($path),
+        ];
+    }
+    // Names start with a UTC timestamp, so they sort chronologically
+    usort($backups, function ($a, $b) {
+        return strcmp($b['file'], $a['file']);
+    });
+    return $backups;
+}
+
+/**
+ * Returns the path of the backup with the given file name, or null if the
+ * name is not a backup name or no such backup exists. The name comes from
+ * the request, so it is matched against the exact naming scheme rather than
+ * just stripped of path components.
+ */
+function z2mGetBackupPath($name)
+{
+    if (!is_string($name) || !preg_match(Z2M_BACKUP_NAME_PATTERN, $name)) {
+        return null;
+    }
+    $path = Z2M_BACKUP_DIR . '/' . $name;
+    return is_file($path) ? $path : null;
 }
 
 /**

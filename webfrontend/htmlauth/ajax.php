@@ -37,6 +37,8 @@ if (isset($_GET["action"])) {
         }
     } else if ($action == "getUpgradeStatus") {
         sendresponse(200, "application/json", json_encode(z2mGetUpgradeState()));
+    } else if ($action == "downloadBackup") {
+        downloadBackup(isset($_GET["file"]) ? $_GET["file"] : "");
     }
 }
 
@@ -47,14 +49,15 @@ if (isset($_GET["action"])) {
  * on another site would need a CORS preflight that this endpoint does not
  * answer. Because the browser sends the LoxBerry login along with such
  * requests, actions that change something or return the MQTT credentials
- * are only accepted with the header, and changing actions only as POST.
+ * (including backups, which contain them) are only accepted with the
+ * header, and changing actions only as POST.
  */
 function requestFromPluginPage($action)
 {
     // permitJoin and testPort are the actions of the pairing buttons and the
     // port test; listed here so they are covered as soon as they exist
     $changing = array("setFormData", "setDevices", "applyChanges", "startUpgrade", "permitJoin", "testPort");
-    $protected = array_merge($changing, array("getFormData"));
+    $protected = array_merge($changing, array("getFormData", "downloadBackup"));
     if (!in_array($action, $protected, true)) {
         return true;
     }
@@ -173,10 +176,29 @@ function getVersionInfo()
     $info = [
         "installedVersion" => z2mGetInstalledVersion(),
         "pinnedVersion" => z2mGetPinnedVersion(),
+        "backups" => z2mListBackups(),
         "releases" => z2mGetAvailableReleases(),
         "upgrade" => z2mGetUpgradeState(0),
     ];
     return json_encode($info);
+}
+
+/**
+ * Sends a backup archive taken before a version change as a download
+ */
+function downloadBackup($name)
+{
+    $path = z2mGetBackupPath($name);
+    if ($path === null) {
+        sendresponse(404, "application/json", '{"error":"Backup not found."}');
+    }
+
+    header("Content-Type: application/gzip");
+    header("Content-Disposition: attachment; filename=\"" . basename($path) . "\"");
+    header("Content-Length: " . filesize($path));
+    header("Cache-Control: no-store");
+    readfile($path);
+    exit(0);
 }
 
 /**

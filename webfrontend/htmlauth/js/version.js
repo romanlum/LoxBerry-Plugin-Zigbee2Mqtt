@@ -87,6 +87,10 @@ function pollUpgradeStatus() {
                 $(".saveerror").text(state.message);
             }
             $(".saveerror").fadeIn();
+            // A failed start still leaves the backup taken before it
+            fetchVersionInfo().then(function (data) {
+                populateBackups(data.backups);
+            });
         }
     }).catch(function () {
         // Transient network hiccup while polling - keep trying
@@ -111,10 +115,74 @@ function populateVersionInfo(data) {
         $select.selectmenu("refresh");
     }
 
+    populateBackups(data.backups);
+
     if (data.upgrade && data.upgrade.status === "running") {
         setBusy(true);
         pollUpgradeStatus();
     }
+}
+
+function formatSize(bytes) {
+    if (bytes >= 1024 * 1024) {
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+    return Math.max(1, Math.round(bytes / 1024)) + " KB";
+}
+
+function populateBackups(backups) {
+    const $body = $("#backups tbody");
+    const downloadText = $("#backups").data("download");
+    $body.empty();
+    (backups || []).forEach(function (backup) {
+        const $download = $("<a>")
+            .attr("href", "#")
+            .addClass("ui-btn ui-mini ui-btn-inline ui-icon-arrow-d ui-btn-icon-left")
+            .text(downloadText)
+            .click(function (e) {
+                e.preventDefault();
+                downloadBackup(backup.file);
+            });
+        $body.append($("<tr>").append(
+            $("<td>").text(new Date(backup.created).toLocaleString()),
+            $("<td>").addClass("mono").text(backup.version),
+            $("<td>").text(formatSize(backup.size)),
+            $("<td>").append($download)
+        ));
+    });
+    $("#nobackups").toggle(!backups || backups.length === 0);
+}
+
+/**
+ * Downloads a backup. A plain link would not carry the X-Requested-With
+ * header that ajax.php requires for it (backups contain the MQTT password
+ * and network key), so it is fetched and then saved from a blob.
+ */
+function downloadBackup(file) {
+    $("#backuperror").hide();
+    fetch(`ajax.php/?action=downloadBackup&file=${encodeURIComponent(file)}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+    }).then(function (response) {
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        return response.blob();
+    }).then(function (blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = file;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        // Revoking right away can cancel the download in some browsers
+        setTimeout(function () {
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }).catch(function () {
+        $("#backuperror").fadeIn();
+    });
 }
 
 $(document).ready(function () {
