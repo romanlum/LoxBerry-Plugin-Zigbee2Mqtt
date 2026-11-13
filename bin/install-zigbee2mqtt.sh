@@ -357,6 +357,30 @@ ln -f -s "$PDATA" "$NEW/data"
 # The systemd unit is only linked once the plugin's own install has
 # completed (postroot.sh does that after this script returns), so during a
 # fresh plugin install there is nothing to stop/start here yet.
+START_STABLE_SECONDS=60
+
+# zigbee2mqtt only exits on startup errors (e.g. adapter not reachable)
+# after its own connect timeouts/retries - ~20s for an unresponsive zstack
+# adapter, plus z2m's own load time on slow hardware - and systemd then
+# restarts it (Restart=always). A single
+# is-active check shortly after starting can therefore land on a process
+# that is about to fail. Instead require the service to stay active with
+# the same main process for START_STABLE_SECONDS: a crash shows up either
+# as the unit leaving "active" (auto-restart delay) or as a new MainPID.
+wait_for_stable_start() {
+    local pid now i
+    pid=$(systemctl show -p MainPID --value zigbee2mqtt 2>/dev/null)
+    for i in $(seq 1 "$START_STABLE_SECONDS"); do
+        sleep 1
+        systemctl is-active --quiet zigbee2mqtt || return 1
+        now=$(systemctl show -p MainPID --value zigbee2mqtt 2>/dev/null)
+        if [ -z "$now" ] || [ "$now" = "0" ] || [ "$now" != "$pid" ]; then
+            return 1
+        fi
+    done
+    return 0
+}
+
 UNIT_EXISTS=0
 if [ -e /etc/systemd/system/zigbee2mqtt.service ]; then
     UNIT_EXISTS=1
@@ -380,9 +404,12 @@ if [ "$UNIT_EXISTS" -eq 1 ]; then
     echo "<INFO> Starting zigbee2mqtt service"
     sudo /bin/systemctl daemon-reload
     sudo /bin/systemctl start zigbee2mqtt
-    sleep 3
-    if ! systemctl is-active --quiet zigbee2mqtt; then
+    echo "<INFO> Waiting ${START_STABLE_SECONDS}s for zigbee2mqtt to start up"
+    if ! wait_for_stable_start; then
         echo "<ERROR> zigbee2mqtt $VERSION failed to start, rolling back"
+        # A failed start may already have been restarted by systemd
+        # (Restart=always) and still be running from $CUR - stop it first.
+        sudo /bin/systemctl stop zigbee2mqtt
         sudo /bin/rm -rf "$CUR"
         if [ -e "$OLD" ]; then
             sudo /bin/mv "$OLD" "$CUR"
