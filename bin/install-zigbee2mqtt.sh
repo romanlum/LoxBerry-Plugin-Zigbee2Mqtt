@@ -104,7 +104,12 @@ write_state() {
         finished="\"$(now)\""
     fi
     mkdir -p "$PCONFIG"
-    cat > "$STATEFILE" <<EOF
+    # Written to a temp file and renamed into place: "cat > $STATEFILE"
+    # truncates the file before the heredoc (incl. the php call) is
+    # expanded, and ajax.php polling in that window would read an empty
+    # file and report "idle", stopping the UI's progress display.
+    local tmp="$STATEFILE.$$"
+    cat > "$tmp" <<EOF
 {
     "status": "$status",
     "version": "$VERSION",
@@ -114,6 +119,7 @@ write_state() {
     "message": $(php -r 'echo json_encode($argv[1]);' "$message" 2>/dev/null || echo "\"$message\"")
 }
 EOF
+    mv -f "$tmp" "$STATEFILE"
 }
 
 fail() {

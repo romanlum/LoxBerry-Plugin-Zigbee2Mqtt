@@ -76,6 +76,13 @@ if [ -d "/tmp/${PTEMPDIR}_upgrade" ]; then
     fi
 fi
 
+# This script runs as root, so files restored above are root-owned. Hand
+# them back to loxberry: zigbee2mqtt (User=loxberry) writes state.json,
+# configuration.yaml etc. at runtime, and install-zigbee2mqtt.sh below runs
+# update-config.php as loxberry too. Also repairs installs already left
+# root-owned by an earlier upgrade.
+chown -R loxberry:loxberry $PCONFIG $PDATA
+
 # Persist version.sh into the plugin's bin folder so install-zigbee2mqtt.sh
 # can still find a fallback Node.js version long after this install/upgrade
 # has finished (e.g. when the user triggers a UI upgrade later on).

@@ -204,7 +204,12 @@ function z2mMarkUpgradeRunning($version)
         'finished' => null,
         'message' => '',
     ];
-    file_put_contents(Z2M_STATE_FILE, json_encode($state));
+    // Written to a temp file and renamed into place, so a concurrent
+    // z2mGetUpgradeState() never reads a truncated, half-written file
+    // (which it would report as "idle", stopping the UI's polling).
+    $tmp = Z2M_STATE_FILE . '.' . getmypid();
+    file_put_contents($tmp, json_encode($state));
+    rename($tmp, Z2M_STATE_FILE);
 }
 
 /**

@@ -53,7 +53,7 @@ function requestFromPluginPage($action)
 {
     // permitJoin and testPort are the actions of the pairing buttons and the
     // port test; listed here so they are covered as soon as they exist
-    $changing = array("setFormData", "setDevices", "applyChanges", "permitJoin", "testPort");
+    $changing = array("setFormData", "setDevices", "applyChanges", "startUpgrade", "permitJoin", "testPort");
     $protected = array_merge($changing, array("getFormData"));
     if (!in_array($action, $protected, true)) {
         return true;
