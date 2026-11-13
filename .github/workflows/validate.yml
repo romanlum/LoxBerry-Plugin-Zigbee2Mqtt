@@ -1,0 +1,135 @@
+on:
+  push:
+    branches:
+      - 'master'
+      - 'feature/**'
+      - 'claude/**'
+  pull_request:
+
+name: validate
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shell:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Syntax check
+        run: |
+          for f in *.sh bin/*.sh uninstall/uninstall .github/tests/*.sh; do
+            bash -n "$f"
+          done
+      - name: ShellCheck
+        # SC2034 (unused variable) is excluded: the LoxBerry script template
+        # defines variables like PHTML or PSBIN that not every script uses.
+        run: |
+          shellcheck --version
+          shellcheck --severity=warning --exclude=SC2034 \
+            *.sh bin/*.sh uninstall/uninstall .github/tests/*.sh
+
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 7.4 is what LoxBerry 3 and 4 run; 8.4 is Debian 13's own PHP
+        php: ['7.4', '8.4']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: yaml
+          tools: composer
+      - name: Syntax check
+        run: find . -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -n1 php -l
+      - name: Install php dependencies
+        run: composer install --no-dev --no-interaction --working-dir=webfrontend/htmlauth/include
+      - name: Language files
+        run: |
+          for f in templates/lang/*.ini; do
+            if ! php -r 'exit(parse_ini_file($argv[1], true, INI_SCANNER_RAW) === false ? 1 : 0);' "$f"; then
+              echo "::error file=$f::Cannot be parsed as an ini file"
+              exit 1
+            fi
+          done
+      - name: Node.js version selection tests
+        run: bash .github/tests/node-version-test.sh
+
+  frontend:
+    name: Web frontend and config files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: JavaScript syntax check
+        run: |
+          for f in webfrontend/htmlauth/js/*.js; do
+            node --check "$f"
+          done
+      - name: JSON files
+        run: find . -name '*.json' -not -path '*/vendor/*' -print0 | xargs -0 -n1 jq empty
+
+  plugin:
+    name: Plugin packaging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: plugin.cfg
+        # NAME and FOLDER identify the plugin to LoxBerry and must never
+        # change; VERSION is filled in by the build/release workflows.
+        run: |
+          for line in 'NAME=zigbee2mqtt' 'FOLDER=zigbee2mqtt' 'VERSION=__VERSION__'; do
+            if ! grep -qx "$line" plugin.cfg; then
+              echo "::error file=plugin.cfg::Expected the line $line"
+              exit 1
+            fi
+          done
+      - name: sudoers syntax
+        run: sudo visudo -cf sudoers/sudoers
+      - name: systemd units
+        # LoxBerry converts the units to LF on install (dos2unix), so do the
+        # same before verifying. Messages about other units on the runner
+        # are ignored.
+        run: |
+          failed=0
+          for f in config/*.service; do
+            unit="$RUNNER_TEMP/$(basename "$f")"
+            sed 's/\r$//' "$f" > "$unit"
+            out=$(systemd-analyze verify "$unit" 2>&1 || true)
+            echo "$out"
+            if echo "$out" | grep -F "$(basename "$f")" | grep -qv "marked executable"; then
+              echo "::error file=$f::systemd-analyze verify reported problems"
+              failed=1
+            fi
+          done
+          exit $failed
+      - name: version.sh baseline
+        # The baseline zigbee2mqtt tag must exist, and the fallback Node.js
+        # release must have a build for every architecture the installer
+        # supports.
+        run: |
+          . ./version.sh
+          if ! git ls-remote --exit-code https://github.com/Koenkk/zigbee2mqtt.git "refs/tags/$ZIGBEE2MQTT_VERSION" >/dev/null; then
+            echo "::error file=version.sh::zigbee2mqtt tag $ZIGBEE2MQTT_VERSION does not exist"
+            exit 1
+          fi
+          for arch in x64 arm64 armv7l; do
+            if ! curl -sfI -o /dev/null "https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-$arch.tar.xz"; then
+              echo "::error file=version.sh::Node.js $NODE_VERSION has no linux-$arch build"
+              exit 1
+            fi
+          done
+          echo "zigbee2mqtt $ZIGBEE2MQTT_VERSION and Node.js $NODE_VERSION OK"
